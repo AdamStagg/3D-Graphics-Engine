@@ -12,10 +12,13 @@ int main() {
 		Vertex(82 , 162, 0, 0, 0xFF0000FF)
 	};
 
-
 	Matrix3x3 m({ 1, 2, 3 }, { 4, 5, 6 }, { 7, 8, 9 });
 	Matrix3x3 o = MatrixMULTMatrix(m, m);
 
+	Vector4 t(1, 2, 3, 4);
+	Vector3 t2 = (Vector3)t;
+
+	Vector4 test = (Vector4)trianglePoints[0];
 
 	Raster = new unsigned int[RasterPixelCount];
 

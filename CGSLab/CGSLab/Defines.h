@@ -7,10 +7,21 @@
 
 typedef unsigned int A_PIXEL;
 
+
+
+
 unsigned int* Raster = nullptr;
 
 struct Vector2 {
-	float x, y;
+	union {
+		struct {
+			float x, y;
+		};
+		struct
+		{
+			float a[2];
+		};
+	};
 	Vector2() 
 	{
 		x = 0; y = 0;
@@ -18,6 +29,8 @@ struct Vector2 {
 	Vector2(float _x, float _y) {
 		x = _x;		y = _y;
 	}
+	//operator Vector3() { return Vector3(x, y, 0); }
+	//operator Vector4() { return Vector4(x, y, 0, 0); }
 };
 
 struct Vector3 {
@@ -37,10 +50,19 @@ struct Vector3 {
 		y = _y;
 		z = _z;
 	}
+	operator Vector2() { return Vector2(x, y); }
+	//operator Vector4() { return Vector4(x, y, z, 0); }
 };
 
 struct Vector4 {
-	float x, y, z, w;
+	union {
+		struct {
+			float x, y, z, w;
+		};
+		struct {
+			float a[4];
+		};
+	};
 	Vector4() {
 		x = 0; y = 0; z = 0; w = 0;
 	}
@@ -50,19 +72,45 @@ struct Vector4 {
 		z = _z;
 		w = _w;
 	}
+	operator Vector3() { return Vector3(x, y, z); }
+	operator Vector2() { return Vector2(x, y); }
 };
 struct Vertex {
-	Vector4 values;
+	union {
+		struct {
+			float x, y, z, w;
+		};
+		struct {
+			Vector4 values;
+		};
+	};
 	unsigned int color;
 	Vertex() {
 		values = Vector4();
 		color = 0xFF000000;
 	}
-	Vertex(float x, float y, float z, float w, unsigned int color) {
-		values = { x, y, z, w };
-		this->color = color;
+	Vertex(float _x, float _y, float _z, float _w, A_PIXEL _color) {
+		values = { _x, _y, _z, _w };
+		this->color = _color;
 	}
+	//operator Vector3() { return Vector3(x, y, z); }
+	//operator Vector2() { return Vector2(x, y); }
+	operator Vector4() { return Vector4(x, y, z, w); }
+};
 
+struct Matrix2x2 {
+	Vector2 matrix[2];
+
+	Matrix2x2() {
+		matrix[0] = { 0, 0 };
+		matrix[1] = { 0, 0 };
+	}
+	Matrix2x2(Vector2 v1, Vector2 v2) {
+		matrix[0] = v1;
+		matrix[1] = v2;
+	}
+	/*operator Matrix3x3() { return Matrix3x3((Vector3)matrix[0], (Vector3)matrix[1], Vector3()); }
+	operator Matrix4x4() { return Matrix4x4((Vector4)matrix[0], (Vector4)matrix[1], Vector4(), Vector4()); }*/
 };
 
 struct Matrix3x3 {
@@ -79,6 +127,8 @@ struct Matrix3x3 {
 		matrix[1] = v2;
 		matrix[2] = v3;
 	}
+	operator Matrix2x2() { return Matrix2x2((Vector2)matrix[0], (Vector2)matrix[1]); }
+	//operator Matrix4x4() { return Matrix4x4((Vector4)matrix[0], (Vector4)matrix[1], (Vector4)matrix[2], Vector4()); }
 };
 
 struct Matrix4x4 {
@@ -96,4 +146,7 @@ struct Matrix4x4 {
 		matrix[2] = v3;
 		matrix[3] = v4;
 	}
+	operator Matrix3x3() { return Matrix3x3((Vector3)matrix[0], (Vector3)matrix[1], (Vector3)matrix[2]); }
+	operator Matrix2x2() { return Matrix2x2((Vector2)matrix[0], (Vector2)matrix[1]); }
+	
 };
