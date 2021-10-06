@@ -96,6 +96,8 @@ struct Vertex {
 	//operator Vector3() { return Vector3(x, y, z); }
 	//operator Vector2() { return Vector2(x, y); }
 	operator Vector4() { return Vector4(x, y, z, w); }
+	operator Vector3() { return Vector3(x, y, z); }
+	operator Vector2() { return Vector2(x, y); }
 };
 
 struct Matrix2x2 {

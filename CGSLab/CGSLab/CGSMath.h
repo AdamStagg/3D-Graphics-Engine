@@ -85,11 +85,11 @@ unsigned int colorLerp(unsigned int _color, unsigned int _ogcolor) {
 	return blendedalpha << 24 | blendedred << 16 | blendedgreen << 8 | blendedblue;
 }
 //Implicit Line Equation
-float ImplicitLineEquation(Vector4 _test, Vector4 _start, Vector4 _end) {
+float ImplicitLineEquation(Vector2 _test, Vector2 _start, Vector2 _end) {
 	return (_start.y - _end.y) * _test.x + (_end.x - _start.x) * _test.y + (_start.x * _end.y - _start.y * _end.x);
 }
 //Finds the Barycentric coordinates from 3 given points
-Vector4 FindBarycentric(Vector4 pointA, Vector4 pointB, Vector4 pointC, Vector4 curr) {
+Vector4 FindBarycentric(Vertex pointA, Vertex pointB, Vertex pointC, Vector2 curr) {
 	float beta	= ImplicitLineEquation(pointB, pointA, pointC);
 	float gamma = ImplicitLineEquation(pointC, pointB, pointA);
 	float alpha = ImplicitLineEquation(pointA, pointC, pointB);
@@ -101,12 +101,14 @@ Vector4 FindBarycentric(Vector4 pointA, Vector4 pointB, Vector4 pointC, Vector4 
 	return Vector4(b/beta, y/gamma, a/alpha, 0);
 }
 
-Vector3 VectorMULTMatrix(Vector3 vect, Matrix3x3 matrix) {
-	return Vector3
+Vertex VectorMULTMatrix(Vector3 vect, Matrix3x3 matrix) {
+	return Vertex
 	(
 		/*x*/vect.x * matrix.matrix[0].x + vect.y * matrix.matrix[1].x + vect.z * matrix.matrix[2].x,
 		/*y*/vect.x * matrix.matrix[0].y + vect.y * matrix.matrix[1].y + vect.z * matrix.matrix[2].y,
-		/*z*/vect.x * matrix.matrix[0].z + vect.y * matrix.matrix[1].z + vect.z * matrix.matrix[2].z
+		/*z*/vect.x * matrix.matrix[0].z + vect.y * matrix.matrix[1].z + vect.z * matrix.matrix[2].z,
+		0,
+		0xFFFF0000
 	);
 }
 Vector4 VectorMULTMatrix(Vector4 vect, Matrix4x4 matrix) {
@@ -126,5 +128,58 @@ Matrix3x3 MatrixMULTMatrix(Matrix3x3 m1, Matrix3x3 m2) {
 		/*row2*/VectorMULTMatrix(m1.matrix[1], m2),
 		/*row3*/VectorMULTMatrix(m1.matrix[2], m2)
 	);
+}
 
+Matrix4x4 MatrixMULTMatrix(Matrix4x4 m1, Matrix4x4 m2) {
+	return Matrix4x4(
+		/*row1*/VectorMULTMatrix(m1.matrix[0], m2),
+		/*row2*/VectorMULTMatrix(m1.matrix[1], m2),
+		/*row3*/VectorMULTMatrix(m1.matrix[2], m2),
+		/*row4*/VectorMULTMatrix(m1.matrix[3], m2)
+	);
+}
+
+Matrix2x2 MatrixInverse(Matrix2x2 m) {
+	return Matrix2x2(
+		Vector2(m.matrix[1].y, -m.matrix[0].y),
+		Vector2(-m.matrix[1].x, m.matrix[0].x)
+	);
+}
+
+Matrix4x4 MatrixInverse(Matrix4x4 m) {
+	return Matrix4x4();
+}
+
+Vertex NDCtoScreen(Vertex v) {
+	return Vertex(
+		(v.x + 1) * (RasterWidth >> 1),
+		(v.y + 1) * (RasterWidth >> 1),
+		(v.z + 1) * (RasterWidth >> 1),
+		(v.w + 1) * (RasterWidth >> 1),
+		v.color
+	);
+}
+
+Matrix3x3 BuildXRotationMatrix(float angle) {
+	return Matrix3x3(
+		Vector3(1,	0,			0),
+		Vector3(0,	cos(angle),	-sin(angle)),
+		Vector3(0,	sin(angle),	cos(angle))
+	);
+}
+
+Matrix3x3 BuildYRotationMatrix(float angle) {
+	return Matrix3x3(
+		Vector3(cos(angle),	0,	sin(angle)),
+		Vector3(0,			1,	0),
+		Vector3(-sin(angle),0,	cos(angle))
+	);
+}
+
+Matrix3x3 BuildZRotationMatrix(float angle) {
+	return Matrix3x3(
+		Vector3(cos(angle), -sin(angle),	0),
+		Vector3(sin(angle), cos(angle),		0),
+		Vector3(0,			0,				1)
+	);
 }

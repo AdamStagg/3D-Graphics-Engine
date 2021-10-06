@@ -18,30 +18,41 @@ void ClearColor(unsigned int* _raster, const int _numPixels, unsigned int _color
 	}
 }
 
-void Bresenham(unsigned int* _raster, const unsigned int _rasterWidth, const Vector2 _startPos, const Vector2 _endPos, const unsigned int _color) {
+void Bresenham(unsigned int* _raster, const unsigned int _rasterWidth, const Vertex& _startPos, const Vertex& _endPos, const unsigned int _color) {
 
-	int currX = _startPos.x;
-	int currY = _startPos.y;
+	Vertex copy_start = _startPos;
+	Vertex copy_end = _endPos;
+
+	if (VertexShader) {
+		VertexShader(copy_start);
+		VertexShader(copy_end);
+	}
+
+	Vector2 screen_start = NDCtoScreen(copy_start);
+	Vector2 screen_end = NDCtoScreen(copy_end);
+
+	int currX = screen_start.x;
+	int currY = screen_start.y;
 	int curr, start, end;
 	float slope;
 
-	int startX = static_cast<int>(_startPos.x), endX = static_cast<int>(_endPos.x), startY = static_cast<int>(_startPos.y), endY = static_cast<int>(_endPos.y);
+	int startX = static_cast<int>(screen_start.x), endX = static_cast<int>(screen_end.x), startY = static_cast<int>(screen_start.y), endY = static_cast<int>(screen_end.y);
 	int inc = 1;
 
-	float slopeX = abs(static_cast<int>(_endPos.y - _startPos.y) / static_cast<float>(static_cast<int>(_endPos.x - _startPos.x)));
-	float slopeY = abs(static_cast<int>(_endPos.x - _startPos.x) / static_cast<float>(static_cast<int>(_endPos.y - _startPos.y)));
+	float slopeX = abs(static_cast<int>(screen_end.y - screen_start.y) / static_cast<float>(static_cast<int>(screen_end.x - screen_start.x)));
+	float slopeY = abs(static_cast<int>(screen_end.x - screen_start.x) / static_cast<float>(static_cast<int>(screen_end.y - screen_start.y)));
 	float error = 0;
 
-	bool isXDominant = abs(static_cast<int>(_endPos.y - _startPos.y) / static_cast<float>(static_cast<int>(_endPos.x - _startPos.x))) < 1;
+	bool isXDominant = abs(static_cast<int>(screen_end.y - screen_start.y) / static_cast<float>(static_cast<int>(screen_end.x - screen_start.x))) < 1;
 
-	if (static_cast<int>(_endPos.x - _startPos.x) < 0) {
+	if (static_cast<int>(screen_end.x - screen_start.x) < 0) {
 		Swap(&startX, &endX);
-		currY = _endPos.y;
+		currY = screen_end.y;
 		inc = -inc;
 	}
-	if (static_cast<int>(_endPos.y - _startPos.y) < 0) {
+	if (static_cast<int>(screen_end.y - screen_start.y) < 0) {
 		Swap(&startY, &endY);
-		currX = _endPos.x;
+		currX = screen_end.x;
 		inc = -inc;
 	}
 
@@ -277,19 +288,33 @@ void Parametric(unsigned int* _raster, const int _rasterWidth, const Vector2 _st
 	}
 }
 
-void FillTriangle(Vector4 p1, Vector4 p2, Vector4 p3, A_PIXEL color) {
+void FillTriangle(const Vertex& p1, const Vertex& p2, const Vertex& p3, const A_PIXEL color) {
+
+	Vertex copy_p1 = p1;
+	Vertex copy_p2 = p2;
+	Vertex copy_p3 = p3;
+
+	if (VertexShader) {
+		VertexShader(copy_p1);
+		VertexShader(copy_p2);
+		VertexShader(copy_p3);
+	}
+
+	Vertex screen_p1 = NDCtoScreen(copy_p1);
+	Vertex screen_p2 = NDCtoScreen(copy_p2);
+	Vertex screen_p3 = NDCtoScreen(copy_p3);
 
 
-	float startX = std::min(std::min(p1.x, p2.x), p3.x);
-	float startY = std::min(std::min(p1.y, p2.y), p3.y);
-	float endX = std::max(std::max(p1.x, p2.x), p3.x);
-	float endY = std::max(std::max(p1.y, p2.y), p3.y);
+	float startX =	std::min(std::min(screen_p1.x, screen_p2.x), screen_p3.x);
+	float startY =	std::min(std::min(screen_p1.y, screen_p2.y), screen_p3.y);
+	float endX =	std::max(std::max(screen_p1.x, screen_p2.x), screen_p3.x);
+	float endY =	std::max(std::max(screen_p1.y, screen_p2.y), screen_p3.y);
 
 	for (float x = startX; x < endX; x++)
 	{
 		for (float y = startY; y < endY; y++)
 		{
-			Vector4 bya = FindBarycentric(p1, p2, p3, Vector4(x, y, 0, 0));
+			Vector4 bya = FindBarycentric(screen_p1, screen_p2, screen_p3, Vector2(x, y));
 			if (bya.x >= 0 && bya.x <= 1 &&
 				bya.y >= 0 && bya.y <= 1 &&
 				bya.z >= 0 && bya.z <= 1)

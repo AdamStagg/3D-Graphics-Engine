@@ -5,37 +5,39 @@
 
 int main() {
 
-	Vertex trianglePoints[3]
+	const Vertex trianglePoints[3]
 	{
-		Vertex(182, 214, 0, 0, 0xFFFF0000),
-		Vertex(201, 170, 0, 0, 0xFF00FF00),
-		Vertex(82 , 162, 0, 0, 0xFF0000FF)
+		Vertex(.5, .5, 0, 0, 0xFFFF0000),
+		Vertex(-.5, .5, 0, 0, 0xFF00FF00),
+		Vertex(0 , -.5, 0, 0, 0xFF0000FF)
 	};
 
-	Matrix3x3 m({ 1, 2, 3 }, { 4, 5, 6 }, { 7, 8, 9 });
-	Matrix3x3 o = MatrixMULTMatrix(m, m);
+	//const Vertex trianglePoints[3]
+	//{
+	//	NDCtoScreen(tp[0]),
+	//	NDCtoScreen(tp[1]),
+	//	NDCtoScreen(tp[2])
+	//};
 
-	Vector4 t(1, 2, 3, 4);
-	Vector3 t2 = (Vector3)t;
-
-	Vector4 test = (Vector4)trianglePoints[0];
 
 	Raster = new unsigned int[RasterPixelCount];
 
 	RS_Initialize(RasterWidth, RasterHeight);
-
+	ClearColor(Raster, RasterPixelCount, 0xFF000000);
 
 	while (RS_Update(Raster, RasterPixelCount)) 
 	{
+		VertexShader = VS_World;
+
 		ClearColor(Raster, RasterPixelCount, 0xFF000000);
 		
- 		FillTriangle(trianglePoints[0].values, trianglePoints[1].values, trianglePoints[2].values, 0xFFE77BC9);
+ 		FillTriangle(trianglePoints[0], trianglePoints[1], trianglePoints[2], 0xFFE77BC9);
 		
+		SV_WorldMatrix = BuildZRotationMatrix(5);
 
-
-		Bresenham(Raster, RasterWidth, Vector2(trianglePoints[0].values.x, trianglePoints[0].values.y), Vector2(trianglePoints[1].values.x, trianglePoints[1].values.y), 0xFFFFFFFF);
-		Bresenham(Raster, RasterWidth, Vector2(trianglePoints[1].values.x, trianglePoints[1].values.y), Vector2(trianglePoints[2].values.x, trianglePoints[2].values.y), 0xFFFFFFFF);
-		Bresenham(Raster, RasterWidth, Vector2(trianglePoints[2].values.x, trianglePoints[2].values.y), Vector2(trianglePoints[0].values.x, trianglePoints[0].values.y), 0xFFFFFFFF);
+		Bresenham(Raster, RasterWidth, trianglePoints[0], trianglePoints[1], 0xFFFFFFFF);
+		Bresenham(Raster, RasterWidth, trianglePoints[1], trianglePoints[2], 0xFFFFFFFF);
+		Bresenham(Raster, RasterWidth, trianglePoints[2], trianglePoints[0], 0xFFFFFFFF);
 
 
 	}
