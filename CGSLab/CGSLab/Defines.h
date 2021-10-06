@@ -11,6 +11,7 @@ typedef unsigned int A_PIXEL;
 
 
 unsigned int* Raster = nullptr;
+float totalTime = 0;
 
 struct Vector2 {
 	union {

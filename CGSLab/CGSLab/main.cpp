@@ -1,7 +1,7 @@
 #include <iostream>
 #include "Rasterization.h"
 #include "RasterSurface.h"
-
+#include "XTime.h"
 
 int main() {
 
@@ -18,7 +18,8 @@ int main() {
 	//	NDCtoScreen(tp[1]),
 	//	NDCtoScreen(tp[2])
 	//};
-
+	XTime timer;
+	timer.Restart();
 
 	Raster = new unsigned int[RasterPixelCount];
 
@@ -27,13 +28,15 @@ int main() {
 
 	while (RS_Update(Raster, RasterPixelCount)) 
 	{
+		timer.Signal();
+		totalTime += timer.Delta();
+
 		VertexShader = VS_World;
+		SV_WorldMatrix = BuildZRotationMatrix(totalTime);
 
 		ClearColor(Raster, RasterPixelCount, 0xFF000000);
 		
- 		FillTriangle(trianglePoints[0], trianglePoints[1], trianglePoints[2], 0xFFE77BC9);
-		
-		SV_WorldMatrix = BuildZRotationMatrix(5);
+ 		FillTriangle(trianglePoints[0], trianglePoints[1], trianglePoints[2], 0xFF808080);
 
 		Bresenham(Raster, RasterWidth, trianglePoints[0], trianglePoints[1], 0xFFFFFFFF);
 		Bresenham(Raster, RasterWidth, trianglePoints[1], trianglePoints[2], 0xFFFFFFFF);
