@@ -4,6 +4,9 @@
 #define RasterHeight 500
 #define RasterPixelCount (RasterWidth * RasterHeight)
 
+#define Identity2x2 Matrix2x2({1, 0}, {0, 1})
+#define Identity3x3 Matrix3x3({1, 0, 0}, {0, 1, 0}, {0, 0, 1})
+#define Identity4x4 Matrix4x4({1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1})
 
 typedef unsigned int A_PIXEL;
 

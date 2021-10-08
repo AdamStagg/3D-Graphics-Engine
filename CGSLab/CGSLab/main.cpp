@@ -14,7 +14,6 @@ int main() {
 
 	const Vertex gridPoints[] = {
 		//X change, close Z
-		Vertex( .3, 0, -.5, 1, 0xFFFFFFFF),
 		Vertex(-.5, 0, -.5, 1, 0xFFFFFFFF),
 		Vertex(-.4, 0, -.5, 1, 0xFFFFFFFF),
 		Vertex(-.3, 0, -.5, 1, 0xFFFFFFFF),
@@ -23,6 +22,7 @@ int main() {
 		Vertex(  0, 0, -.5, 1, 0xFFFFFFFF),
 		Vertex( .1, 0, -.5, 1, 0xFFFFFFFF),
 		Vertex( .2, 0, -.5, 1, 0xFFFFFFFF),
+		Vertex( .3, 0, -.5, 1, 0xFFFFFFFF),
 		Vertex( .4, 0, -.5, 1, 0xFFFFFFFF),
 		Vertex( .5, 0, -.5, 1, 0xFFFFFFFF),
 		//X change, far Z
@@ -97,7 +97,8 @@ int main() {
 		
 		//APPLY GRID SHADER
 		VertexShader = VS_World;
-		SV_WorldMatrix = Matrix4x4({ 1, 0, 0, 0 }, { 0, 1, 0 ,0 }, { 0, 0, 1 ,0 }, { 0, 0, 0, 1 });
+		SV_WorldMatrix = Identity4x4;
+		SV_WorldMatrix = BuildXRotationMatrix(.8);
 
 		//DRAW GRID
 		for (size_t i = 0; i < 11; i++)
@@ -110,6 +111,7 @@ int main() {
 		//APPLY CUBE SHADER
 		VertexShader = VS_World;
 		Matrix4x4 rotMat = BuildYRotationMatrix(totalTime);
+		rotMat = MatrixMULTMatrix(rotMat, BuildXRotationMatrix(.8));
 		Matrix4x4 tranMat = Matrix4x4({ 1, 0, 0, 0 }, { 0, 1, 0, 0 }, { 0, 0, 1, 0 }, { 0, -.25, 0, 1 });
 		rotMat = MatrixMULTMatrix(rotMat, tranMat);
 

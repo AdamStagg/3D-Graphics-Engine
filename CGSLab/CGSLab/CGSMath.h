@@ -194,3 +194,44 @@ Matrix4x4 BuildZRotationMatrix(float angle) {
 		Vector4(0, 0, 0, 1)
 	);
 }
+
+Matrix2x2 MatrixTranspose(Matrix2x2 matrix) {
+	return Matrix2x2(
+		Vector2(matrix.matrix[0].x, matrix.matrix[1].x),
+		Vector2(matrix.matrix[0].y, matrix.matrix[1].y)
+	);
+}
+
+Matrix3x3 MatrixTranspose(Matrix3x3 matrix) {
+	return Matrix3x3(
+		Vector3(matrix.matrix[0].x, matrix.matrix[1].x, matrix.matrix[2].x),
+		Vector3(matrix.matrix[0].y, matrix.matrix[1].y, matrix.matrix[2].y),
+		Vector3(matrix.matrix[0].z, matrix.matrix[1].z, matrix.matrix[2].z)
+	);
+}
+
+Matrix4x4 MatrixTranspose(Matrix4x4 matrix) {
+	return Matrix4x4(
+		Vector4(matrix.matrix[0].x, matrix.matrix[1].x, matrix.matrix[2].x, matrix.matrix[2].x),
+		Vector4(matrix.matrix[0].y, matrix.matrix[1].y, matrix.matrix[2].y, matrix.matrix[2].y),
+		Vector4(matrix.matrix[0].z, matrix.matrix[1].z, matrix.matrix[2].z, matrix.matrix[2].z),
+		Vector4(matrix.matrix[0].w, matrix.matrix[1].w, matrix.matrix[2].w, matrix.matrix[2].w)
+	);
+}
+
+float MatrixDeterminant(Matrix2x2 matrix) {
+	return matrix.matrix[0].x * matrix.matrix[1].y - matrix.matrix[0].y * matrix.matrix[1].x;
+}
+
+float MatrixDeterminant(Matrix3x3 matrix) {
+	return
+	(
+		matrix.matrix[0].x * (matrix.matrix[1].y * matrix.matrix[2].z - matrix.matrix[2].y * matrix.matrix[1].z) -
+		matrix.matrix[0].y * (matrix.matrix[1].x * matrix.matrix[2].z - matrix.matrix[2].x * matrix.matrix[1].z) +
+		matrix.matrix[0].z * (matrix.matrix[1].x * matrix.matrix[2].y - matrix.matrix[2].x * matrix.matrix[1].y)
+	);
+}
+
+float MatrixDeterminant(Matrix4x4 matrix) {
+	return 0;
+}
