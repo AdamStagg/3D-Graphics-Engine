@@ -5,9 +5,9 @@
 void (*VertexShader)(Vertex&) = 0;
 void (*PixelShader)(A_PIXEL&) = 0;
 
-Matrix3x3 SV_WorldMatrix;
+Matrix4x4 SV_WorldMatrix;
 
 void VS_World(Vertex& vert) {
-	vert = VectorMULTMatrix(vert, SV_WorldMatrix);
+	vert.values = VectorMULTMatrix(vert, SV_WorldMatrix);
 }
 

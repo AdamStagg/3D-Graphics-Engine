@@ -18,7 +18,7 @@ void ClearColor(unsigned int* _raster, const int _numPixels, unsigned int _color
 	}
 }
 
-void Bresenham(unsigned int* _raster, const unsigned int _rasterWidth, const Vertex& _startPos, const Vertex& _endPos, const unsigned int _color) {
+void Bresenham(const Vertex& _startPos, const Vertex& _endPos, const unsigned int _color) {
 
 	Vertex copy_start = _startPos;
 	Vertex copy_end = _endPos;
@@ -69,7 +69,7 @@ void Bresenham(unsigned int* _raster, const unsigned int _rasterWidth, const Ver
 
 	for (curr = start; curr <= end; curr++)
 	{
-		PlotPixel(_raster, _rasterWidth, isXDominant ? Vector2(curr, currY) : Vector2(currX, curr), _color);
+		PlotPixel(Raster, RasterWidth, isXDominant ? Vector2(curr, currY) : Vector2(currX, curr), _color);
 		error += slope;
 		if (error > 0.5f) {
 			isXDominant ? currY += inc : currX += inc;

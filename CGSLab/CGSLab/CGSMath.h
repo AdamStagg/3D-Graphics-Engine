@@ -101,14 +101,12 @@ Vector4 FindBarycentric(Vertex pointA, Vertex pointB, Vertex pointC, Vector2 cur
 	return Vector4(b/beta, y/gamma, a/alpha, 0);
 }
 
-Vertex VectorMULTMatrix(Vector3 vect, Matrix3x3 matrix) {
-	return Vertex
+Vector3 VectorMULTMatrix(Vector3 vect, Matrix3x3 matrix) {
+	return Vector3
 	(
 		/*x*/vect.x * matrix.matrix[0].x + vect.y * matrix.matrix[1].x + vect.z * matrix.matrix[2].x,
 		/*y*/vect.x * matrix.matrix[0].y + vect.y * matrix.matrix[1].y + vect.z * matrix.matrix[2].y,
-		/*z*/vect.x * matrix.matrix[0].z + vect.y * matrix.matrix[1].z + vect.z * matrix.matrix[2].z,
-		0,
-		0xFFFF0000
+		/*z*/vect.x * matrix.matrix[0].z + vect.y * matrix.matrix[1].z + vect.z * matrix.matrix[2].z
 	);
 }
 Vector4 VectorMULTMatrix(Vector4 vect, Matrix4x4 matrix) {
@@ -119,6 +117,16 @@ Vector4 VectorMULTMatrix(Vector4 vect, Matrix4x4 matrix) {
 /*z*/vect.x * matrix.matrix[0].z + vect.y * matrix.matrix[1].z + vect.z * matrix.matrix[2].z + vect.w * matrix.matrix[3].z,
 /*w*/vect.x * matrix.matrix[0].w + vect.y * matrix.matrix[1].w + vect.z * matrix.matrix[2].w + vect.w * matrix.matrix[3].w
 	);
+}
+Vertex VectorMULTMatrix(Vertex vect, Matrix4x4 matrix) {
+	return Vertex
+	{
+		/*x*/vect.x * matrix.matrix[0].x + vect.y * matrix.matrix[1].x + vect.z * matrix.matrix[2].x + vect.w * matrix.matrix[3].x,
+		/*y*/vect.x * matrix.matrix[0].y + vect.y * matrix.matrix[1].y + vect.z * matrix.matrix[2].y + vect.w * matrix.matrix[3].y,
+		/*z*/vect.x * matrix.matrix[0].z + vect.y * matrix.matrix[1].z + vect.z * matrix.matrix[2].z + vect.w * matrix.matrix[3].z,
+		/*w*/vect.x * matrix.matrix[0].w + vect.y * matrix.matrix[1].w + vect.z * matrix.matrix[2].w + vect.w * matrix.matrix[3].w,
+		vect.color
+	};
 }
 
 Matrix3x3 MatrixMULTMatrix(Matrix3x3 m1, Matrix3x3 m2) {
@@ -160,26 +168,29 @@ Vertex NDCtoScreen(Vertex v) {
 	);
 }
 
-Matrix3x3 BuildXRotationMatrix(float angle) {
-	return Matrix3x3(
-		Vector3(1,	0,			0),
-		Vector3(0,	cos(angle),	-sin(angle)),
-		Vector3(0,	sin(angle),	cos(angle))
+Matrix4x4 BuildXRotationMatrix(float angle) {
+	return Matrix4x4(
+		Vector4(1, 0, 0, 0),
+		Vector4(0, cos(angle), -sin(angle), 0),
+		Vector4(0, sin(angle), cos(angle), 0),
+		Vector4(0, 0, 0, 1)
 	);
 }
 
-Matrix3x3 BuildYRotationMatrix(float angle) {
-	return Matrix3x3(
-		Vector3(cos(angle),	0,	sin(angle)),
-		Vector3(0,			1,	0),
-		Vector3(-sin(angle),0,	cos(angle))
+Matrix4x4 BuildYRotationMatrix(float angle) {
+	return Matrix4x4(
+		Vector4(cos(angle),	0,	sin(angle),0),
+		Vector4(0,			1,	0,0),
+		Vector4(-sin(angle),0,	cos(angle),0),
+		Vector4(0, 0, 0, 1)
 	);
 }
 
-Matrix3x3 BuildZRotationMatrix(float angle) {
-	return Matrix3x3(
-		Vector3(cos(angle), -sin(angle),	0),
-		Vector3(sin(angle), cos(angle),		0),
-		Vector3(0,			0,				1)
+Matrix4x4 BuildZRotationMatrix(float angle) {
+	return Matrix4x4(
+		Vector4(cos(angle), -sin(angle),	0,0),
+		Vector4(sin(angle), cos(angle),		0,0),
+		Vector4(0,			0,				1,0),
+		Vector4(0, 0, 0, 1)
 	);
 }
