@@ -84,6 +84,32 @@ unsigned int colorLerp(unsigned int _color, unsigned int _ogcolor) {
 	//return the result
 	return blendedalpha << 24 | blendedred << 16 | blendedgreen << 8 | blendedblue;
 }
+
+unsigned int colorBerp(Vector3 bya, unsigned int color1, unsigned int color2, unsigned int color3) {
+
+	unsigned int color1A = (color1 & 0xFF000000) >> 24;
+	unsigned int color2A = (color2 & 0xFF000000) >> 24;
+	unsigned int color3A = (color3 & 0xFF000000) >> 24;
+
+	unsigned int color1R = (color1 & 0x00FF0000) >> 16;
+	unsigned int color2R = (color2 & 0x00FF0000) >> 16;
+	unsigned int color3R = (color3 & 0x00FF0000) >> 16;
+
+	unsigned int color1G = (color1 & 0x0000FF00) >> 8;
+	unsigned int color2G = (color2 & 0x0000FF00) >> 8;
+	unsigned int color3G = (color3 & 0x0000FF00) >> 8;
+
+	unsigned int color1B = (color1 & 0x000000FF);
+	unsigned int color2B = (color2 & 0x000000FF);
+	unsigned int color3B = (color3 & 0x000000FF);
+
+	unsigned int finalA = (static_cast<unsigned int>(bya.x * color1A + bya.y * color2A + bya.z * color3A)) << 24;
+	unsigned int finalR = (static_cast<unsigned int>(bya.x * color1R + bya.y * color2R + bya.z * color3R)) << 16;
+	unsigned int finalG = (static_cast<unsigned int>(bya.x * color1G + bya.y * color2G + bya.z * color3G)) << 8;
+	unsigned int finalB = (static_cast<unsigned int>(bya.x * color1B + bya.y * color2B + bya.z * color3B));
+
+	return finalA | finalR | finalG | finalB;
+}
 //Implicit Line Equation
 float ImplicitLineEquation(Vector2 _test, Vector2 _start, Vector2 _end) {
 	return (_start.y - _end.y) * _test.x + (_end.x - _start.x) * _test.y + (_start.x * _end.y - _start.y * _end.x);
@@ -101,14 +127,12 @@ Vector4 FindBarycentric(Vertex pointA, Vertex pointB, Vertex pointC, Vector2 cur
 	return Vector4(b/beta, y/gamma, a/alpha, 0);
 }
 
-Vertex VectorMULTMatrix(Vector3 vect, Matrix3x3 matrix) {
-	return Vertex
+Vector3 VectorMULTMatrix(Vector3 vect, Matrix3x3 matrix) {
+	return Vector3
 	(
 		/*x*/vect.x * matrix.matrix[0].x + vect.y * matrix.matrix[1].x + vect.z * matrix.matrix[2].x,
 		/*y*/vect.x * matrix.matrix[0].y + vect.y * matrix.matrix[1].y + vect.z * matrix.matrix[2].y,
-		/*z*/vect.x * matrix.matrix[0].z + vect.y * matrix.matrix[1].z + vect.z * matrix.matrix[2].z,
-		0,
-		0xFFFF0000
+		/*z*/vect.x * matrix.matrix[0].z + vect.y * matrix.matrix[1].z + vect.z * matrix.matrix[2].z
 	);
 }
 Vector4 VectorMULTMatrix(Vector4 vect, Matrix4x4 matrix) {
@@ -121,6 +145,26 @@ Vector4 VectorMULTMatrix(Vector4 vect, Matrix4x4 matrix) {
 	);
 }
 
+Vertex VectorMULTMatrix(Vertex vect, Matrix4x4 matrix) {
+	return Vertex
+	(
+		/*x*/vect.x * matrix.matrix[0].x + vect.y * matrix.matrix[1].x + vect.z * matrix.matrix[2].x + vect.w * matrix.matrix[3].x,
+		/*y*/vect.x * matrix.matrix[0].y + vect.y * matrix.matrix[1].y + vect.z * matrix.matrix[2].y + vect.w * matrix.matrix[3].y,
+		/*z*/vect.x * matrix.matrix[0].z + vect.y * matrix.matrix[1].z + vect.z * matrix.matrix[2].z + vect.w * matrix.matrix[3].z,
+		/*w*/vect.x * matrix.matrix[0].w + vect.y * matrix.matrix[1].w + vect.z * matrix.matrix[2].w + vect.w * matrix.matrix[3].w,
+		vect.color
+	);
+}
+Vertex VectorMULTMatrix(Vertex vect, Matrix3x3 matrix) {
+	return Vertex
+	(
+		/*x*/vect.x * matrix.matrix[0].x + vect.y * matrix.matrix[1].x + vect.z * matrix.matrix[2].x,
+		/*y*/vect.x * matrix.matrix[0].y + vect.y * matrix.matrix[1].y + vect.z * matrix.matrix[2].y,
+		/*z*/vect.x * matrix.matrix[0].z + vect.y * matrix.matrix[1].z + vect.z * matrix.matrix[2].z,
+		/*w*/0,
+		vect.color
+	);
+}
 Matrix3x3 MatrixMULTMatrix(Matrix3x3 m1, Matrix3x3 m2) {
 	return Matrix3x3
 	(

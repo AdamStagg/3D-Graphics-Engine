@@ -319,7 +319,7 @@ void FillTriangle(const Vertex& p1, const Vertex& p2, const Vertex& p3, const A_
 				bya.y >= 0 && bya.y <= 1 &&
 				bya.z >= 0 && bya.z <= 1)
 			{
-				PlotPixel(Raster, RasterWidth, Vector2(x, y), color);
+				PlotPixel(Raster, RasterWidth, Vector2(x, y), colorBerp(bya, screen_p1.color, screen_p2.color, screen_p3.color));
 			}
 		}
 	}
