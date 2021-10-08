@@ -18,7 +18,7 @@ void ClearColor(unsigned int* _raster, const int _numPixels, unsigned int _color
 	}
 }
 
-void Bresenham(unsigned int* _raster, const unsigned int _rasterWidth, const Vertex& _startPos, const Vertex& _endPos, const unsigned int _color) {
+void Bresenham(unsigned int* _raster, const unsigned int _rasterWidth, const Vertex& _startPos, const Vertex& _endPos, const unsigned int& _color) {
 
 	Vertex copy_start = _startPos;
 	Vertex copy_end = _endPos;
@@ -31,8 +31,8 @@ void Bresenham(unsigned int* _raster, const unsigned int _rasterWidth, const Ver
 	Vector2 screen_start = NDCtoScreen(copy_start);
 	Vector2 screen_end = NDCtoScreen(copy_end);
 
-	int currX = screen_start.x;
-	int currY = screen_start.y;
+	int currX = static_cast<int>(screen_start.x);
+	int currY = static_cast<int>(screen_start.y);
 	int curr, start, end;
 	float slope;
 
@@ -47,12 +47,12 @@ void Bresenham(unsigned int* _raster, const unsigned int _rasterWidth, const Ver
 
 	if (static_cast<int>(screen_end.x - screen_start.x) < 0) {
 		Swap(&startX, &endX);
-		currY = screen_end.y;
+		currY = static_cast<int>(screen_end.y);
 		inc = -inc;
 	}
 	if (static_cast<int>(screen_end.y - screen_start.y) < 0) {
 		Swap(&startY, &endY);
-		currX = screen_end.x;
+		currX = static_cast<int>(screen_end.x);
 		inc = -inc;
 	}
 
@@ -69,7 +69,13 @@ void Bresenham(unsigned int* _raster, const unsigned int _rasterWidth, const Ver
 
 	for (curr = start; curr <= end; curr++)
 	{
-		PlotPixel(_raster, _rasterWidth, isXDominant ? Vector2(curr, currY) : Vector2(currX, curr), _color);
+		A_PIXEL copyColor = _color;
+
+		if (PixelShader) {
+			PixelShader(copyColor);
+		}
+
+		PlotPixel(_raster, _rasterWidth, isXDominant ? Vector2(static_cast<float>(curr), static_cast<float>(currY)) : Vector2(static_cast<float>(currX), static_cast<float>(curr)), copyColor);
 		error += slope;
 		if (error > 0.5f) {
 			isXDominant ? currY += inc : currX += inc;
@@ -123,7 +129,7 @@ void MidPoint(unsigned int* _raster, const unsigned int _rasterWidth, const Vect
 		start = startX;
 		end = endX;
 		yInc = 0.5f;
-		xInc = inc;
+		xInc = static_cast<float>(inc);
 		yTogg = 1;
 	}
 	else {
@@ -139,7 +145,7 @@ void MidPoint(unsigned int* _raster, const unsigned int _rasterWidth, const Vect
 #if 1 //this code works for all lines in one for loop, unsure if the gradient is correct though
 	for (curr = start; curr <= end; curr++)
 	{
-		PlotPixel(_raster, _rasterWidth, isXDominant ? Vector2(curr, currY) : Vector2(currX, curr), _color);
+		PlotPixel(_raster, _rasterWidth, isXDominant ? Vector2(static_cast<float>(curr), static_cast<float>(currY)) : Vector2(static_cast<float>(currX), static_cast<float>(curr)), _color);
 		Vector4 mid(isXDominant ? curr + xInc : currX + xInc, isXDominant ? currY + yInc : curr + yInc, 0, 0);
 		if (toggle * ((yTogg * static_cast<int>(_endPos.x - _startPos.x)) < 0 ? ImplicitLineEquation(mid, _end, _start) : ImplicitLineEquation(mid, _start, _end)) < 0) {
 			isXDominant ? currY += inc : currX += inc;
@@ -270,25 +276,25 @@ void Parametric(unsigned int* _raster, const int _rasterWidth, const Vector2 _st
 	if (isXDominant) {
 		start = startX;
 		end = endX;
-		start2 = startY;
-		end2 = endY;
+		start2 = static_cast<float>(startY);
+		end2 = static_cast<float>(endY);
 	}
 	else {
 		start = startY;
 		end = endY;
-		start2 = startX;
-		end2 = endX;
+		start2 = static_cast<float>(startX);
+		end2 = static_cast<float>(endX);
 	}
 
 	for (curr = start; toggle * curr <= toggle * end; curr += toggle)
 	{
 		float ratio = (curr - start) / static_cast<float>(end - start);
-		isXDominant ? currY = lerp(start2, end2, ratio) : currX = lerp(start2, end2, ratio);
+		isXDominant ? currY = lerp(static_cast<int>(start2), static_cast<int>(end2), ratio) : currX = lerp(static_cast<int>(start2), static_cast<int>(end2), ratio);
 		PlotPixel(_raster, _rasterWidth, Vector2(static_cast<float>(isXDominant ? curr : floor(currX + 0.5)), static_cast<float>(isXDominant ? floor(currY + 0.5f) : curr)), colorLerp(_color1, _color2, ratio));
 	}
 }
 
-void FillTriangle(const Vertex& p1, const Vertex& p2, const Vertex& p3, const A_PIXEL color) {
+void FillTriangle(const Vertex& p1, const Vertex& p2, const Vertex& p3) {
 
 	Vertex copy_p1 = p1;
 	Vertex copy_p2 = p2;
@@ -319,7 +325,13 @@ void FillTriangle(const Vertex& p1, const Vertex& p2, const Vertex& p3, const A_
 				bya.y >= 0 && bya.y <= 1 &&
 				bya.z >= 0 && bya.z <= 1)
 			{
-				PlotPixel(Raster, RasterWidth, Vector2(x, y), colorBerp(bya, screen_p1.color, screen_p2.color, screen_p3.color));
+				A_PIXEL berpedColor = colorBerp(bya, screen_p1.color, screen_p2.color, screen_p3.color);
+
+				if (PixelShader) {
+					PixelShader(berpedColor);
+				}
+
+				PlotPixel(Raster, RasterWidth, Vector2(x, y), berpedColor);
 			}
 		}
 	}

@@ -38,9 +38,9 @@ unsigned int colorLerp(unsigned int _color1, unsigned int _color2, float ratio) 
 	unsigned int g2 = (_color2 & 0x0000FF00) >> 8;
 	unsigned int b2 = (_color2 & 0x000000FF);
 
-	unsigned int blendedRed = (static_cast<int>(r2) - static_cast<int>(r1)) * ratio + r1;
-	unsigned int blendedGreen = (static_cast<int>(g2) - static_cast<int>(g1)) * ratio + g1;
-	unsigned int blendedBlue = (static_cast<int>(b2) - static_cast<int>(b1)) * ratio + b1;
+	unsigned int blendedRed =	static_cast<unsigned int>((static_cast<int>(r2) - static_cast<int>(r1)) * ratio + r1);
+	unsigned int blendedGreen = static_cast<unsigned int>((static_cast<int>(g2) - static_cast<int>(g1)) * ratio + g1);
+	unsigned int blendedBlue =	static_cast<unsigned int>((static_cast<int>(b2) - static_cast<int>(b1)) * ratio + b1);
 
 	return 0xFF000000 | blendedRed << 16 | blendedGreen << 8 | blendedBlue;
 

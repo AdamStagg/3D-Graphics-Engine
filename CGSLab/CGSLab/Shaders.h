@@ -11,3 +11,6 @@ void VS_World(Vertex& vert) {
 	vert = VectorMULTMatrix(vert, SV_WorldMatrix);
 }
 
+void PS_SetColor(A_PIXEL& color) {
+	color = color;
+}
