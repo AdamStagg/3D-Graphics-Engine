@@ -1,5 +1,7 @@
 #pragma once
 
+#define PI 3.14159265358979323846
+
 #define RasterWidth 500
 #define RasterHeight 500
 #define RasterPixelCount (RasterWidth * RasterHeight)
@@ -8,10 +10,21 @@
 #define Identity3x3 Matrix3x3({1, 0, 0}, {0, 1, 0}, {0, 0, 1})
 #define Identity4x4 Matrix4x4({1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1})
 
+#define cot(x) (1/tan(x))
+#define csc(x) (1/sin(x))
+#define sec(x) (1/cos(x))
+
 typedef unsigned int A_PIXEL;
 
+struct Matrix4x4;
 
+Matrix4x4* camera;
+float NearPlane = 0.1f;
+float FarPlane = 10.0f;
+float VerticalFOV = 90.0f;
+float AspectRatio = RasterHeight / RasterWidth;
 
+bool orbit = false;
 
 unsigned int* Raster = nullptr;
 float totalTime = 0;
@@ -26,7 +39,7 @@ struct Vector2 {
 			float a[2];
 		};
 	};
-	Vector2() 
+	Vector2()
 	{
 		x = 0; y = 0;
 	}
@@ -79,6 +92,7 @@ struct Vector4 {
 	operator Vector3() { return Vector3(x, y, z); }
 	operator Vector2() { return Vector2(x, y); }
 };
+
 struct Vertex {
 	union {
 		struct {
@@ -97,8 +111,6 @@ struct Vertex {
 		values = { _x, _y, _z, _w };
 		this->color = _color;
 	}
-	//operator Vector3() { return Vector3(x, y, z); }
-	//operator Vector2() { return Vector2(x, y); }
 	operator Vector4() { return Vector4(x, y, z, w); }
 	operator Vector3() { return Vector3(x, y, z); }
 	operator Vector2() { return Vector2(x, y); }
@@ -115,8 +127,8 @@ struct Matrix2x2 {
 		matrix[0] = v1;
 		matrix[1] = v2;
 	}
-	/*operator Matrix3x3() { return Matrix3x3((Vector3)matrix[0], (Vector3)matrix[1], Vector3()); }
-	operator Matrix4x4() { return Matrix4x4((Vector4)matrix[0], (Vector4)matrix[1], Vector4(), Vector4()); }*/
+	//operator Matrix3x3() { return Matrix3x3((Vector3)matrix[0], (Vector3)matrix[1], Vector3()); }
+	//operator Matrix4x4() { return Matrix4x4((Vector4)matrix[0], (Vector4)matrix[1], Vector4(), Vector4()); }
 };
 
 struct Matrix3x3 {
@@ -154,5 +166,4 @@ struct Matrix4x4 {
 	}
 	operator Matrix3x3() { return Matrix3x3((Vector3)matrix[0], (Vector3)matrix[1], (Vector3)matrix[2]); }
 	operator Matrix2x2() { return Matrix2x2((Vector2)matrix[0], (Vector2)matrix[1]); }
-	
 };

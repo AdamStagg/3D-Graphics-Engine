@@ -6,8 +6,8 @@ void PlotPixel(unsigned int* _raster, const int _rasterIndex, const unsigned int
 	_raster[_rasterIndex] = _color;
 }
 
-void PlotPixel(unsigned int* _raster, const int _width, const Vector2 _pos, const unsigned int _color) {
-	_raster[ConvertDimension(_pos, _width)] = _color;
+void PlotPixel(const Vector2 _pos, const unsigned int _color) {
+	Raster[ConvertDimension(_pos, RasterWidth)] = _color;
 }
 
 void ClearColor(unsigned int* _raster, const int _numPixels, unsigned int _color) {
@@ -69,7 +69,7 @@ void Bresenham(const Vertex& _startPos, const Vertex& _endPos, const unsigned in
 
 	for (curr = start; curr <= end; curr++)
 	{
-		PlotPixel(Raster, RasterWidth, isXDominant ? Vector2(curr, currY) : Vector2(currX, curr), _color);
+		PlotPixel(isXDominant ? Vector2(curr, currY) : Vector2(currX, curr), _color);
 		error += slope;
 		if (error > 0.5f) {
 			isXDominant ? currY += inc : currX += inc;
@@ -139,7 +139,7 @@ void MidPoint(unsigned int* _raster, const unsigned int _rasterWidth, const Vect
 #if 1 //this code works for all lines in one for loop, unsure if the gradient is correct though
 	for (curr = start; curr <= end; curr++)
 	{
-		PlotPixel(_raster, _rasterWidth, isXDominant ? Vector2(curr, currY) : Vector2(currX, curr), _color);
+		PlotPixel(isXDominant ? Vector2(curr, currY) : Vector2(currX, curr), _color);
 		Vector4 mid(isXDominant ? curr + xInc : currX + xInc, isXDominant ? currY + yInc : curr + yInc, 0, 0);
 		if (toggle * ((yTogg * static_cast<int>(_endPos.x - _startPos.x)) < 0 ? ImplicitLineEquation(mid, _end, _start) : ImplicitLineEquation(mid, _start, _end)) < 0) {
 			isXDominant ? currY += inc : currX += inc;
@@ -284,7 +284,7 @@ void Parametric(unsigned int* _raster, const int _rasterWidth, const Vector2 _st
 	{
 		float ratio = (curr - start) / static_cast<float>(end - start);
 		isXDominant ? currY = lerp(start2, end2, ratio) : currX = lerp(start2, end2, ratio);
-		PlotPixel(_raster, _rasterWidth, Vector2(static_cast<float>(isXDominant ? curr : floor(currX + 0.5)), static_cast<float>(isXDominant ? floor(currY + 0.5f) : curr)), colorLerp(_color1, _color2, ratio));
+		PlotPixel(Vector2(static_cast<float>(isXDominant ? curr : floor(currX + 0.5)), static_cast<float>(isXDominant ? floor(currY + 0.5f) : curr)), colorLerp(_color1, _color2, ratio));
 	}
 }
 
@@ -319,7 +319,7 @@ void FillTriangle(const Vertex& p1, const Vertex& p2, const Vertex& p3, const A_
 				bya.y >= 0 && bya.y <= 1 &&
 				bya.z >= 0 && bya.z <= 1)
 			{
-				PlotPixel(Raster, RasterWidth, Vector2(x, y), color);
+				PlotPixel(Vector2(x, y), color);
 			}
 		}
 	}

@@ -2,6 +2,7 @@
 #include "Rasterization.h"
 #include "RasterSurface.h"
 #include "XTime.h"
+#include <Windows.h>
 
 int main() {
 
@@ -50,17 +51,17 @@ int main() {
 		Vertex(-.5, 0, .4, 1, 0xFFFFFFFF),
 		Vertex(-.5, 0, .5, 1, 0xFFFFFFFF),
 		//Right X changing Z
-		Vertex(.5, 0,-.5, 1, 0xFFFFFFFF),
-		Vertex(.5, 0,-.4, 1, 0xFFFFFFFF),
-		Vertex(.5, 0,-.3, 1, 0xFFFFFFFF),
-		Vertex(.5, 0,-.2, 1, 0xFFFFFFFF),
-		Vertex(.5, 0,-.1, 1, 0xFFFFFFFF),
-		Vertex(.5, 0,  0, 1, 0xFFFFFFFF),
-		Vertex(.5, 0, .1, 1, 0xFFFFFFFF),
-		Vertex(.5, 0, .2, 1, 0xFFFFFFFF),
-		Vertex(.5, 0, .3, 1, 0xFFFFFFFF),
-		Vertex(.5, 0, .4, 1, 0xFFFFFFFF),
-		Vertex(.5, 0, .5, 1, 0xFFFFFFFF)
+Vertex(.5, 0, -.5, 1, 0xFFFFFFFF),
+Vertex(.5, 0, -.4, 1, 0xFFFFFFFF),
+Vertex(.5, 0, -.3, 1, 0xFFFFFFFF),
+Vertex(.5, 0, -.2, 1, 0xFFFFFFFF),
+Vertex(.5, 0, -.1, 1, 0xFFFFFFFF),
+Vertex(.5, 0, 0, 1, 0xFFFFFFFF),
+Vertex(.5, 0, .1, 1, 0xFFFFFFFF),
+Vertex(.5, 0, .2, 1, 0xFFFFFFFF),
+Vertex(.5, 0, .3, 1, 0xFFFFFFFF),
+Vertex(.5, 0, .4, 1, 0xFFFFFFFF),
+Vertex(.5, 0, .5, 1, 0xFFFFFFFF)
 	};
 
 	const Vertex cubePoints[] = {
@@ -74,12 +75,17 @@ int main() {
 		Vertex(-.25,  .25,  .25, 1, 0xFF00FF00)
 	};
 
-	//const Vertex trianglePoints[3]
-	//{
-	//	NDCtoScreen(tp[0]),
-	//	NDCtoScreen(tp[1]),
-	//	NDCtoScreen(tp[2])
-	//};
+	//const Vertex cameraPoint(0, 0, 0, 0, 0);
+
+	Matrix4x4 cameraMatrix = MatrixMULTMatrix(
+		Matrix4x4({ 1, 0, 0, 0 }, { 0, 1, 0, 0 }, { 0, 0, 1, 0 }, { 0, 0, -1, 1 }),
+		BuildXRotationMatrix(DegToRad(18))
+	);
+
+	camera = &cameraMatrix;
+
+
+
 	XTime timer;
 	timer.Restart();
 
@@ -88,19 +94,21 @@ int main() {
 	RS_Initialize(RasterWidth, RasterHeight);
 	ClearColor(Raster, RasterPixelCount, 0xFF000000);
 
-	while (RS_Update(Raster, RasterPixelCount)) 
+	while (RS_Update(Raster, RasterPixelCount))
 	{
 		//Initialization
 		timer.Signal();
 		totalTime += timer.Delta();
 		ClearColor(Raster, RasterPixelCount, 0xFF000000);
-		
-		//APPLY GRID SHADER
-		VertexShader = VS_World;
-		SV_WorldMatrix = Identity4x4;
-		SV_WorldMatrix = BuildXRotationMatrix(.8);
 
+
+
+
+		//APPLY GRID SHADER
+		VertexShader = VS_PerspectiveCamera;
+		SV_WorldMatrix = Identity4x4;
 		//DRAW GRID
+
 		for (size_t i = 0; i < 11; i++)
 		{
 			Bresenham(gridPoints[i], gridPoints[i + 11], gridPoints[0].color);
@@ -109,22 +117,44 @@ int main() {
 
 
 		//APPLY CUBE SHADER
-		VertexShader = VS_World;
+		VertexShader = VS_PerspectiveCamera;
 		Matrix4x4 rotMat = BuildYRotationMatrix(totalTime);
-		rotMat = MatrixMULTMatrix(rotMat, BuildXRotationMatrix(.8));
 		Matrix4x4 tranMat = Matrix4x4({ 1, 0, 0, 0 }, { 0, 1, 0, 0 }, { 0, 0, 1, 0 }, { 0, -.25, 0, 1 });
-		rotMat = MatrixMULTMatrix(rotMat, tranMat);
+		SV_WorldMatrix = MatrixMULTMatrix(rotMat, tranMat);
 
-		SV_WorldMatrix = rotMat;
+		//SV_WorldMatrix = MatrixMULTMatrix(rotMat, viewMatrix);
 
+		Matrix4x4 cubeViewMatrix = OrthogonalAffineInverse(SV_WorldMatrix);
 		//DRAW CUBE
 		for (size_t i = 0; i < 4; i++)
 		{
 			Bresenham(cubePoints[i], cubePoints[(i + 4)], cubePoints[0].color);
 			Bresenham(cubePoints[i], cubePoints[(i + 1) % 4], cubePoints[0].color);
-			Bresenham(cubePoints[i + 4], cubePoints[4 + (i + 1)%4], cubePoints[0].color);
+			Bresenham(cubePoints[i + 4], cubePoints[4 + (i + 1) % 4], cubePoints[0].color);
 		}
+		if (orbit) {
+			Matrix4x4 secondCube = Matrix4x4({ .2, 0, 0, 0 }, { 0, .2, 0, 0 }, { 0, 0, .2, 0 }, { .5, -.8, 0, 1 });
+			secondCube = MatrixMULTMatrix(BuildYRotationMatrix(-totalTime), secondCube);
+			secondCube = MatrixMULTMatrix(BuildXRotationMatrix(totalTime * 2), secondCube);
+			secondCube = MatrixMULTMatrix(secondCube, cubeViewMatrix);
+			SV_WorldMatrix = secondCube;
 
+			for (size_t i = 0; i < 4; i++)
+			{
+				Bresenham(cubePoints[i], cubePoints[(i + 4)], 0xFF00FFFF);
+				Bresenham(cubePoints[i], cubePoints[(i + 1) % 4], 0xFF00FFFF);
+				Bresenham(cubePoints[i + 4], cubePoints[4 + (i + 1) % 4], 0xFF00FFFF);
+			}
+		}
+		if (GetAsyncKeyState(VK_SPACE) & 0x1) {
+			VerticalFOV += 0.01f;
+		}
+		if (GetAsyncKeyState(VK_RETURN) & 0x1) {
+			VerticalFOV -= 0.01f;
+		}
+		if (GetAsyncKeyState(VK_BACK) & 0x1) {
+			orbit = !orbit;
+		}
 
 	}
 

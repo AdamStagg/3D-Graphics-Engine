@@ -158,12 +158,12 @@ Matrix4x4 MatrixInverse(Matrix4x4 m) {
 	return Matrix4x4();
 }
 
-Vertex NDCtoScreen(Vertex v) {
+Vertex NDCtoScreen(const Vertex& v) {
 	return Vertex(
 		(v.x + 1) * (RasterWidth >> 1),
-		(v.y + 1) * (RasterWidth >> 1),
-		(v.z + 1) * (RasterWidth >> 1),
-		(v.w + 1) * (RasterWidth >> 1),
+		(1 - v.y) * (RasterHeight >> 1),
+		v.z,//(v.z + 1) * (RasterHeight >> 1),
+		v.w,//(v.w + 1) * (RasterHeight >> 1),
 		v.color
 	);
 }
@@ -219,11 +219,11 @@ Matrix4x4 MatrixTranspose(Matrix4x4 matrix) {
 	);
 }
 
-float MatrixDeterminant(Matrix2x2 matrix) {
+float MatrixDeterminant(const Matrix2x2 matrix) {
 	return matrix.matrix[0].x * matrix.matrix[1].y - matrix.matrix[0].y * matrix.matrix[1].x;
 }
 
-float MatrixDeterminant(Matrix3x3 matrix) {
+float MatrixDeterminant(const Matrix3x3 matrix) {
 	return
 	(
 		matrix.matrix[0].x * (matrix.matrix[1].y * matrix.matrix[2].z - matrix.matrix[2].y * matrix.matrix[1].z) -
@@ -232,6 +232,46 @@ float MatrixDeterminant(Matrix3x3 matrix) {
 	);
 }
 
-float MatrixDeterminant(Matrix4x4 matrix) {
-	return 0;
+float MatrixDeterminant(const Matrix4x4 m) {
+
+	float d1 = MatrixDeterminant(Matrix3x3({ m.matrix[1].y, m.matrix[1].z, m.matrix[1].w }, { m.matrix[2].y, m.matrix[2].z, m.matrix[2].w }, { m.matrix[3].y, m.matrix[3].z, m.matrix[3].w }));
+	float d2 = MatrixDeterminant(Matrix3x3({ m.matrix[1].x, m.matrix[1].z, m.matrix[1].w }, { m.matrix[2].x, m.matrix[2].z, m.matrix[2].w }, { m.matrix[3].x, m.matrix[3].z, m.matrix[3].w }));
+	float d3 = MatrixDeterminant(Matrix3x3({ m.matrix[1].x, m.matrix[1].y, m.matrix[1].w }, { m.matrix[2].x, m.matrix[2].y, m.matrix[2].w }, { m.matrix[3].x, m.matrix[3].y, m.matrix[3].w }));
+	float d4 = MatrixDeterminant(Matrix3x3({ m.matrix[1].x, m.matrix[1].y, m.matrix[1].z }, { m.matrix[2].x, m.matrix[2].y, m.matrix[2].z }, { m.matrix[3].x, m.matrix[3].y, m.matrix[3].z }));
+
+	return(m.matrix[0].x * d1 - m.matrix[0].y * d2 + m.matrix[0].z * d3 - m.matrix[0].w * d4);
+}
+
+Matrix4x4 OrthogonalAffineInverse(const Matrix4x4& matrix) {
+	Matrix3x3 pos = MatrixTranspose(matrix);
+	Vector3 translation(matrix.matrix[3].x, matrix.matrix[3].y, matrix.matrix[3].z);
+	translation = VectorMULTMatrix(translation, pos);
+	translation.x = -translation.x;
+	translation.y = -translation.y;
+	translation.z = -translation.z;
+
+	return Matrix4x4(
+		Vector4(pos.matrix[0].x, pos.matrix[0].y, pos.matrix[0].z, 0),
+		Vector4(pos.matrix[1].x, pos.matrix[1].y, pos.matrix[1].z, 0),
+		Vector4(pos.matrix[2].x, pos.matrix[2].y, pos.matrix[2].z, 0),
+		Vector4(translation.x, translation.y, translation.z, 1)
+	);
+}
+
+float DegToRad(float degrees) {
+	return (degrees * (PI / 180.0f));
+}
+
+float RadToDeg(float radians) {
+	return (radians * (180.0f / PI));
+}
+
+Matrix4x4 BuildProjectionMatrix(float FOV, float nearPlane, float farPlane, float aspectRatio) {
+	return Matrix4x4
+	(
+		Vector4((cot(FOV))*aspectRatio, 0, 0, 0),
+		Vector4(0, cot(FOV), 0, 0),
+		Vector4(0, 0, (farPlane)/(farPlane-nearPlane), 1),
+		Vector4(0, 0, (-(farPlane * nearPlane))/(farPlane-nearPlane), 0)
+	);
 }
