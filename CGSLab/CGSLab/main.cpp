@@ -6,13 +6,6 @@
 
 int main() {
 
-	const Vertex trianglePoints[3]
-	{
-		Vertex(.5f, .5f, 0, 0, 0xFFFF0000),
-		Vertex(-.5f, .5f, 0, 0, 0xFF00FF00),
-		Vertex(0 , -.5f, 0, 0, 0xFF0000FF)
-	};
-
 	const Vertex gridPoints[] = {
 		//X change, close Z
 		Vertex(-.5f, 0, -.5f, 1, 0xFFFFFFFF),
@@ -21,23 +14,23 @@ int main() {
 		Vertex(-.2f, 0, -.5f, 1, 0xFFFFFFFF),
 		Vertex(-.1f, 0, -.5f, 1, 0xFFFFFFFF),
 		Vertex(0.0f, 0, -.5f, 1, 0xFFFFFFFF),
-		Vertex( .1f, 0, -.5f, 1, 0xFFFFFFFF),
-		Vertex( .2f, 0, -.5f, 1, 0xFFFFFFFF),
-		Vertex( .3f, 0, -.5f, 1, 0xFFFFFFFF),
-		Vertex( .4f, 0, -.5f, 1, 0xFFFFFFFF),
-		Vertex( .5f, 0, -.5f, 1, 0xFFFFFFFF),
+		Vertex(.1f, 0, -.5f, 1, 0xFFFFFFFF),
+		Vertex(.2f, 0, -.5f, 1, 0xFFFFFFFF),
+		Vertex(.3f, 0, -.5f, 1, 0xFFFFFFFF),
+		Vertex(.4f, 0, -.5f, 1, 0xFFFFFFFF),
+		Vertex(.5f, 0, -.5f, 1, 0xFFFFFFFF),
 		//X change, far Z
 		Vertex(-.5f, 0, .5f, 1, 0xFFFFFFFF),
 		Vertex(-.4f, 0, .5f, 1, 0xFFFFFFFF),
 		Vertex(-.3f, 0, .5f, 1, 0xFFFFFFFF),
 		Vertex(-.2f, 0, .5f, 1, 0xFFFFFFFF),
 		Vertex(-.1f, 0, .5f, 1, 0xFFFFFFFF),
-		Vertex(  0, 0, .5f, 1, 0xFFFFFFFF),
-		Vertex( .1f, 0, .5f, 1, 0xFFFFFFFF),
-		Vertex( .2f, 0, .5f, 1, 0xFFFFFFFF),
-		Vertex( .3f, 0, .5f, 1, 0xFFFFFFFF),
-		Vertex( .4f, 0, .5f, 1, 0xFFFFFFFF),
-		Vertex( .5f, 0, .5f, 1, 0xFFFFFFFF),
+		Vertex(0, 0, .5f, 1, 0xFFFFFFFF),
+		Vertex(.1f, 0, .5f, 1, 0xFFFFFFFF),
+		Vertex(.2f, 0, .5f, 1, 0xFFFFFFFF),
+		Vertex(.3f, 0, .5f, 1, 0xFFFFFFFF),
+		Vertex(.4f, 0, .5f, 1, 0xFFFFFFFF),
+		Vertex(.5f, 0, .5f, 1, 0xFFFFFFFF),
 		//Left X changing Z
 		Vertex(-.5f, 0,-.5f, 1, 0xFFFFFFFF),
 		Vertex(-.5f, 0,-.4f, 1, 0xFFFFFFFF),
@@ -51,17 +44,17 @@ int main() {
 		Vertex(-.5f, 0, .4f, 1, 0xFFFFFFFF),
 		Vertex(-.5f, 0, .5f, 1, 0xFFFFFFFF),
 		//Right X changing Z
-Vertex(.5f, 0, -.5f, 1, 0xFFFFFFFF),
-Vertex(.5f, 0, -.4f, 1, 0xFFFFFFFF),
-Vertex(.5f, 0, -.3f, 1, 0xFFFFFFFF),
-Vertex(.5f, 0, -.2f, 1, 0xFFFFFFFF),
-Vertex(.5f, 0, -.1f, 1, 0xFFFFFFFF),
-Vertex(.5f, 0, 0, 1, 0xFFFFFFFF),
-Vertex(.5f, 0, .1f, 1, 0xFFFFFFFF),
-Vertex(.5f, 0, .2f, 1, 0xFFFFFFFF),
-Vertex(.5f, 0, .3f, 1, 0xFFFFFFFF),
-Vertex(.5f, 0, .4f, 1, 0xFFFFFFFF),
-Vertex(.5f, 0, .5f, 1, 0xFFFFFFFF)
+		Vertex(.5f, 0, -.5f, 1, 0xFFFFFFFF),
+		Vertex(.5f, 0, -.4f, 1, 0xFFFFFFFF),
+		Vertex(.5f, 0, -.3f, 1, 0xFFFFFFFF),
+		Vertex(.5f, 0, -.2f, 1, 0xFFFFFFFF),
+		Vertex(.5f, 0, -.1f, 1, 0xFFFFFFFF),
+		Vertex(.5f, 0, 0, 1, 0xFFFFFFFF),
+		Vertex(.5f, 0, .1f, 1, 0xFFFFFFFF),
+		Vertex(.5f, 0, .2f, 1, 0xFFFFFFFF),
+		Vertex(.5f, 0, .3f, 1, 0xFFFFFFFF),
+		Vertex(.5f, 0, .4f, 1, 0xFFFFFFFF),
+		Vertex(.5f, 0, .5f, 1, 0xFFFFFFFF)
 	};
 
 	const Vertex cubePoints[] = {
@@ -90,18 +83,16 @@ Vertex(.5f, 0, .5f, 1, 0xFFFFFFFF)
 	timer.Restart();
 
 	Raster = new unsigned int[RasterPixelCount];
+	ClearColor(0);
 
 	RS_Initialize(RasterWidth, RasterHeight);
-	ClearColor(Raster, RasterPixelCount, 0xFF000000);
 
-	while (RS_Update(Raster, RasterPixelCount))
+
+	while(RS_Update(Raster, RasterPixelCount))
 	{
 		//Initialization
 		timer.Signal();
-		totalTime += static_cast<float>(timer.Delta());
-		ClearColor(Raster, RasterPixelCount, 0xFF000000);
-
-
+		ClearColor(0xFF000000);
 
 
 		//APPLY GRID SHADER
@@ -118,9 +109,11 @@ Vertex(.5f, 0, .5f, 1, 0xFFFFFFFF)
 
 		//APPLY CUBE SHADER
 		VertexShader = VS_PerspectiveCamera;
-		Matrix4x4 rotMat = BuildYRotationMatrix(totalTime);
+		Matrix4x4 rotMat = BuildYRotationMatrix(static_cast<float>(timer.TotalTime()));
 		Matrix4x4 tranMat = Matrix4x4({ 1, 0, 0, 0 }, { 0, 1, 0, 0 }, { 0, 0, 1, 0 }, { 0, -.25, 0, 1 });
-		SV_WorldMatrix = MatrixMULTMatrix(rotMat, tranMat);
+		Matrix4x4 cubeMatrix = MatrixMULTMatrix(rotMat, tranMat);
+
+		SV_WorldMatrix = cubeMatrix;
 
 		//SV_WorldMatrix = MatrixMULTMatrix(rotMat, viewMatrix);
 
@@ -132,19 +125,17 @@ Vertex(.5f, 0, .5f, 1, 0xFFFFFFFF)
 			Bresenham(cubePoints[i], cubePoints[(i + 1) % 4], cubePoints[0].color);
 			Bresenham(cubePoints[i + 4], cubePoints[4 + (i + 1) % 4], cubePoints[0].color);
 		}
-		if (orbit) {
-			Matrix4x4 secondCube = Matrix4x4({ .2f, 0, 0, 0 }, { 0, .2f, 0, 0 }, { 0, 0, .2f, 0 }, { .5f, -.8f, 0, 1 });
-			secondCube = MatrixMULTMatrix(BuildYRotationMatrix(-totalTime), secondCube);
-			secondCube = MatrixMULTMatrix(BuildXRotationMatrix(totalTime * 2), secondCube);
-			secondCube = MatrixMULTMatrix(secondCube, cubeViewMatrix);
-			SV_WorldMatrix = secondCube;
+		Matrix4x4 secondCube = Matrix4x4({ .2f, 0, 0, 0 }, { 0, .2f, 0, 0 }, { 0, 0, .2f, 0 }, { .5f, -.8f, 0, 1 });
+		secondCube = MatrixMULTMatrix(BuildYRotationMatrix(-static_cast<float>(timer.TotalTime())), secondCube);
+		secondCube = MatrixMULTMatrix(BuildXRotationMatrix(static_cast<float>(timer.TotalTime()) * 2), secondCube);
+		secondCube = MatrixMULTMatrix(secondCube, cubeViewMatrix);
+		SV_WorldMatrix = secondCube;
 
-			for (size_t i = 0; i < 4; i++)
-			{
-				Bresenham(cubePoints[i], cubePoints[(i + 4)], 0xFF00FFFF);
-				Bresenham(cubePoints[i], cubePoints[(i + 1) % 4], 0xFF00FFFF);
-				Bresenham(cubePoints[i + 4], cubePoints[4 + (i + 1) % 4], 0xFF00FFFF);
-			}
+		for (size_t i = 0; i < 4; i++)
+		{
+			Bresenham(cubePoints[i], cubePoints[(i + 4)], 0xFF00FFFF);
+			Bresenham(cubePoints[i], cubePoints[(i + 1) % 4], 0xFF00FFFF);
+			Bresenham(cubePoints[i + 4], cubePoints[4 + (i + 1) % 4], 0xFF00FFFF);
 		}
 		if (GetAsyncKeyState(VK_SPACE) & 0x1) {
 			VerticalFOV += 0.01f;
@@ -152,11 +143,7 @@ Vertex(.5f, 0, .5f, 1, 0xFFFFFFFF)
 		if (GetAsyncKeyState(VK_RETURN) & 0x1) {
 			VerticalFOV -= 0.01f;
 		}
-		if (GetAsyncKeyState(VK_BACK) & 0x1) {
-			orbit = !orbit;
-		}
-
-	}
+	};
 
 	RS_Shutdown();
 	delete[] Raster;

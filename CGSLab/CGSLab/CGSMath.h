@@ -48,24 +48,16 @@ unsigned int colorLerp(unsigned int _color1, unsigned int _color2, float ratio) 
 //Interpolates two colors based on alpha
 unsigned int colorLerp(unsigned int _color, unsigned int _ogcolor) {
 
-	//alpha channel first
 	unsigned int alpha = _color & 0xFF000000;
 	alpha = alpha >> 24;
 
-	//code to optimize because a lot of sprites dont need to blend, if it is fully opaque or fully transparent
-	//if the ratio is 1, just return the new color
 	if (alpha / 255.0f == 1) {
 		return _color;
 	}
-	//if the ratio is 0 return the old color
-	else if (alpha / 255.0f == 0) {
+	else if (alpha == 0) {
 		return _ogcolor;
 	}
 
-	//new color rgb
-	unsigned int red   = (_color & 0x00FF0000) >> 16;
-	unsigned int green = (_color & 0x0000FF00) >> 8;
-	unsigned int blue  = (_color & 0x000000FF);
 
 	//old color values
 	unsigned int ogalpha = (_ogcolor & 0xFF000000) >> 24;
@@ -74,10 +66,10 @@ unsigned int colorLerp(unsigned int _color, unsigned int _ogcolor) {
 	unsigned int ogblue  = (_ogcolor & 0x000000FF);
 
 	//lerp blend
-	unsigned int blendedred = static_cast<unsigned int>(((static_cast<int>(red) - static_cast<int>(ogred)) * (alpha / 255.0f) + ogred));
-	unsigned int blendedgreen = static_cast<unsigned int>(((static_cast<int>(green) - static_cast<int>(oggreen)) * (alpha / 255.0f) + oggreen));
-	unsigned int blendedblue = static_cast<unsigned int>(((static_cast<int>(blue) - static_cast<int>(ogblue)) * (alpha / 255.0f) + ogblue));
-	unsigned int blendedalpha = static_cast<unsigned int>(((static_cast<int>(alpha) - static_cast<int>(ogalpha)) * (alpha / 255.0f) + ogalpha));
+	unsigned int blendedred =	static_cast<unsigned int>(((static_cast<int>((_color & 0x00FF0000) >> 16)	- static_cast<int>(ogred))		* (alpha / 255.0f) + ogred));
+	unsigned int blendedgreen = static_cast<unsigned int>(((static_cast<int>((_color & 0x0000FF00) >> 8) - static_cast<int>(oggreen))	* (alpha / 255.0f) + oggreen));
+	unsigned int blendedblue =	static_cast<unsigned int>(((static_cast<int>(_color & 0x000000FF)	- static_cast<int>(ogblue))		* (alpha / 255.0f) + ogblue));
+	unsigned int blendedalpha = static_cast<unsigned int>(((static_cast<int>(alpha) - static_cast<int>(ogalpha))	* (alpha / 255.0f) + ogalpha));
 
 
 
@@ -198,35 +190,35 @@ Vertex NDCtoScreen(const Vertex& v) {
 	return Vertex(
 		(v.x + 1) * (RasterWidth >> 1),
 		(1 - v.y) * (RasterHeight >> 1),
-		v.z,//(v.z + 1) * (RasterHeight >> 1),
-		v.w,//(v.w + 1) * (RasterHeight >> 1),
+		v.z,
+		v.w,
 		v.color
 	);
 }
 
 Matrix4x4 BuildXRotationMatrix(float angle) {
 	return Matrix4x4(
-		Vector4(1, 0, 0, 0),
-		Vector4(0, cos(angle), -sin(angle), 0),
-		Vector4(0, sin(angle), cos(angle), 0),
-		Vector4(0, 0, 0, 1)
+		Vector4(1,	0,				0,				0),
+		Vector4(0,	cos(angle),		-sin(angle),	0),
+		Vector4(0,	sin(angle),		cos(angle),		0),
+		Vector4(0,	0,				0,				1)
 	);
 }
 
 Matrix4x4 BuildYRotationMatrix(float angle) {
 	return Matrix4x4(
-		Vector4(cos(angle),	0,	sin(angle),0),
-		Vector4(0,			1,	0,0),
-		Vector4(-sin(angle),0,	cos(angle),0),
-		Vector4(0, 0, 0, 1)
+		Vector4(cos(angle),	0,	sin(angle),		0),
+		Vector4(0,			1,	0,				0),
+		Vector4(-sin(angle),0,	cos(angle),		0),
+		Vector4(0,			0,	0,				1)
 	);
 }
 
 Matrix4x4 BuildZRotationMatrix(float angle) {
 	return Matrix4x4(
-		Vector4(cos(angle), -sin(angle),	0,0),
-		Vector4(sin(angle), cos(angle),		0,0),
-		Vector4(0,			0,				1,0),
+		Vector4(cos(angle), -sin(angle),	0,		0),
+		Vector4(sin(angle), cos(angle),		0,		0),
+		Vector4(0,			0,				1,		0),
 		Vector4(0, 0, 0, 1)
 	);
 }
@@ -248,10 +240,10 @@ Matrix3x3 MatrixTranspose(Matrix3x3 matrix) {
 
 Matrix4x4 MatrixTranspose(Matrix4x4 matrix) {
 	return Matrix4x4(
-		Vector4(matrix.matrix[0].x, matrix.matrix[1].x, matrix.matrix[2].x, matrix.matrix[2].x),
-		Vector4(matrix.matrix[0].y, matrix.matrix[1].y, matrix.matrix[2].y, matrix.matrix[2].y),
-		Vector4(matrix.matrix[0].z, matrix.matrix[1].z, matrix.matrix[2].z, matrix.matrix[2].z),
-		Vector4(matrix.matrix[0].w, matrix.matrix[1].w, matrix.matrix[2].w, matrix.matrix[2].w)
+		Vector4(matrix.matrix[0].x, matrix.matrix[1].x, matrix.matrix[2].x, matrix.matrix[3].x),
+		Vector4(matrix.matrix[0].y, matrix.matrix[1].y, matrix.matrix[2].y, matrix.matrix[3].y),
+		Vector4(matrix.matrix[0].z, matrix.matrix[1].z, matrix.matrix[2].z, matrix.matrix[3].z),
+		Vector4(matrix.matrix[0].w, matrix.matrix[1].w, matrix.matrix[2].w, matrix.matrix[3].w)
 	);
 }
 
@@ -287,10 +279,10 @@ Matrix4x4 OrthogonalAffineInverse(const Matrix4x4& matrix) {
 	translation.z = -translation.z;
 
 	return Matrix4x4(
-		Vector4(pos.matrix[0].x, pos.matrix[0].y, pos.matrix[0].z, 0),
-		Vector4(pos.matrix[1].x, pos.matrix[1].y, pos.matrix[1].z, 0),
-		Vector4(pos.matrix[2].x, pos.matrix[2].y, pos.matrix[2].z, 0),
-		Vector4(translation.x, translation.y, translation.z, 1)
+		Vector4(pos.matrix[0].x,	pos.matrix[0].y,	pos.matrix[0].z,	0),
+		Vector4(pos.matrix[1].x,	pos.matrix[1].y,	pos.matrix[1].z,	0),
+		Vector4(pos.matrix[2].x,	pos.matrix[2].y,	pos.matrix[2].z,	0),
+		Vector4(translation.x,		translation.y,		translation.z,		1)
 	);
 }
 
@@ -305,10 +297,10 @@ float RadToDeg(float radians) {
 Matrix4x4 BuildProjectionMatrix(float FOV, float nearPlane, float farPlane, float aspectRatio) {
 	return Matrix4x4
 	(
-		Vector4((cot(FOV))*aspectRatio, 0, 0, 0),
-		Vector4(0, cot(FOV), 0, 0),
-		Vector4(0, 0, (farPlane)/(farPlane-nearPlane), 1),
-		Vector4(0, 0, (-(farPlane * nearPlane))/(farPlane-nearPlane), 0)
+		Vector4((cot(FOV))*aspectRatio,	0,					0,												0),
+		Vector4(0,						cot(FOV),			0,												0),
+		Vector4(0,						0,					(farPlane)/(farPlane-nearPlane),				1),
+		Vector4(0,						0,					(-(farPlane * nearPlane))/(farPlane-nearPlane), 0)
 	);
 }
 

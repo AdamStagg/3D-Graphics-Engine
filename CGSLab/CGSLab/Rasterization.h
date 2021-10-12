@@ -7,14 +7,17 @@ void PlotPixel( const int _rasterIndex, const unsigned int _color) {
 }
 
 void PlotPixel(const Vector2 _pos, const unsigned int _color) {
-	Raster[ConvertDimension(_pos, RasterWidth)] = _color;
+	if (_pos.x >= 0 && _pos.x < RasterWidth && _pos.y >= 0 && _pos.y < RasterHeight)
+	{
+			Raster[ConvertDimension(_pos, RasterWidth)] = _color;
+	}
 }
 
-void ClearColor(unsigned int* _raster, const int _numPixels, unsigned int _color) {
+void ClearColor(unsigned int _color) {
 
-	for (int i = 0; i < _numPixels; i++)
+	for (int i = 0; i < RasterPixelCount; i++)
 	{
-		_raster[i] = _color;
+		Raster[i] = _color;
 	}
 }
 
@@ -84,7 +87,7 @@ void Bresenham(const Vertex& _startPos, const Vertex& _endPos, const unsigned in
 	}
 }
 
-void MidPoint(unsigned int* _raster, const unsigned int _rasterWidth, const Vector2 _startPos, const Vector2 _endPos, const unsigned int _color) {
+void MidPoint(const Vector2 _startPos, const Vector2 _endPos, const unsigned int _color) {
 
 	float currX = _startPos.x;
 	float currY = _startPos.y;
@@ -111,7 +114,6 @@ void MidPoint(unsigned int* _raster, const unsigned int _rasterWidth, const Vect
 	if (static_cast<int>(_endPos.x - _startPos.x) < 0) {
 		Swap(&startX, &endX);
 		currY = _endPos.y;
-		//isXDominant ? curr2 = static_cast<int>(_endPos.y) : curr = static_cast<int>(_endPos.y); //currY = _endPos.y;
 		inc = -inc;
 		toggle = -toggle;
 		xInc = -xInc;
@@ -119,7 +121,6 @@ void MidPoint(unsigned int* _raster, const unsigned int _rasterWidth, const Vect
 	if (static_cast<int>(_endPos.y - _startPos.y) < 0) {
 		Swap(&startY, &endY);
 		currX = _endPos.x;
-		//isXDominant ? static_cast<int>(_endPos.x) : static_cast<int>(_endPos.x); //currX = _endPos.x;
 		inc = -inc;
 		toggle = -toggle;
 		yInc = -yInc;
@@ -142,7 +143,6 @@ void MidPoint(unsigned int* _raster, const unsigned int _rasterWidth, const Vect
 	Vector4 _end{ _endPos.x, _endPos.y, 0, 0 };
 	Vector4 _start{ _startPos.x, _startPos.y, 0, 0 };
 
-#if 1 //this code works for all lines in one for loop, unsure if the gradient is correct though
 	for (curr = start; curr <= end; curr++)
 	{
 		PlotPixel(isXDominant ? Vector2(static_cast<float>(curr), static_cast<float>(currY)) : Vector2(static_cast<float>(currX), static_cast<float>(curr)), _color);
@@ -151,100 +151,9 @@ void MidPoint(unsigned int* _raster, const unsigned int _rasterWidth, const Vect
 			isXDominant ? currY += inc : currX += inc;
 		}
 	}
-#endif
-
-#if 0 //all lines working and gradient is correct, will simplify later
-	if (isRight && isDown && isXDominant) { //o1
-
-		currY = startY;
-		for (curr = start; curr <= end; curr++)
-		{
-			PlotPixel(_raster, _rasterWidth, Vector2(curr, currY), _color);
-			Vector2 mid(curr + 1, currY + 0.5f);
-			if (ImplicitLineEquation(mid, _startPos, _endPos) < 0) {
-				currY++;
-			}
-		}
-	}
-	else if (isRight && isDown && !isXDominant) { //o2
-
-		currX = startX;
-		for (curr = start; curr <= end; curr++) {
-			PlotPixel(_raster, _rasterWidth, Vector2(currX, curr), _color);
-			Vector2 mid(currX + 0.5f, curr + 1);
-			if (ImplicitLineEquation(mid, _startPos, _endPos) > 0) {
-				currX++;
-			}
-		}
-
-	}
-	else if (!isRight && isDown && !isXDominant) { //o3
-		currX = startX;
-		for (curr = start; curr <= end; curr++) {
-			PlotPixel(_raster, _rasterWidth, Vector2(currX, curr), _color);
-			Vector2 mid(currX - 0.5f, curr + 1);
-			if (ImplicitLineEquation(mid, _startPos, _endPos) < 0) {
-				currX--;
-			}
-		}
-	}
-	else if (!isRight && isDown && isXDominant) { //o4
-		currY = startY;
-		for (curr = start; curr >= end; curr--)
-		{
-			PlotPixel(_raster, _rasterWidth, Vector2(curr, currY), _color);
-			Vector2 mid(curr + 1, currY - 0.5f);
-			if (ImplicitLineEquation(mid, _startPos, _endPos) > 0) {
-				currY++;
-			}
-		}
-	}
-	else if (!isRight && !isDown && isXDominant) { //o5
-		currY = startY;
-		for (curr = start; curr >= end; curr--)
-		{
-			PlotPixel(_raster, _rasterWidth, Vector2(curr, currY), _color);
-			Vector2 mid(curr + 1, currY + 0.5f);
-			if (ImplicitLineEquation(mid, _startPos, _endPos) < 0) {
-				currY--;
-			}
-		}
-	}
-	else if (!isRight && !isDown && !isXDominant) { //o6
-		currX = startX;
-		for (curr = start; curr >= end; curr--) {
-			PlotPixel(_raster, _rasterWidth, Vector2(currX, curr), _color);
-			Vector2 mid(currX + 0.5f, curr + 1);
-			if (ImplicitLineEquation(mid, _startPos, _endPos) > 0) {
-				currX--;
-			}
-		}
-	}
-	else if (isRight && !isDown && !isXDominant) { //o7
-		currX = startX;
-		for (curr = start; curr >= end; curr--) {
-			PlotPixel(_raster, _rasterWidth, Vector2(currX, curr), _color);
-			Vector2 mid(currX + 0.5f, curr - 1);
-			if (ImplicitLineEquation(mid, _startPos, _endPos) < 0) {
-				currX++;
-			}
-		}
-	}
-	else { //o8
-		currY = startY;
-		for (curr = start; curr <= end; curr++)
-		{
-			PlotPixel(_raster, _rasterWidth, Vector2(curr, currY), _color);
-			Vector2 mid(curr - 1, currY + 0.5f);
-			if (ImplicitLineEquation(mid, _startPos, _endPos) > 0) {
-				currY--;
-			}
-		}
-	}
-#endif
 }
 
-void Parametric(unsigned int* _raster, const int _rasterWidth, const Vector2 _start, const Vector2 _end, const unsigned int _color1, const unsigned int _color2) {
+void Parametric(const Vector2 _start, const Vector2 _end, const unsigned int _color1, const unsigned int _color2) {
 
 	float currX = _start.x;
 	float currY = _start.y;
@@ -263,7 +172,6 @@ void Parametric(unsigned int* _raster, const int _rasterWidth, const Vector2 _st
 	float slopeY = deltaX / static_cast<float>(deltaY);
 
 	bool isXDominant = abs(slopeX) < 1; //octant 1, 3, 4, 8 if true
-	bool isRight = deltaX > 0;
 	bool isDown = deltaY > 0;
 
 	if (deltaX < 0 && isXDominant) {

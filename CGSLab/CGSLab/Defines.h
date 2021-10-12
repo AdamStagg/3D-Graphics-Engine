@@ -2,8 +2,8 @@
 
 #define PI 3.14159265358979323846
 
-#define RasterWidth 500
-#define RasterHeight 500
+#define RasterWidth 1024
+#define RasterHeight 720
 #define RasterPixelCount (RasterWidth * RasterHeight)
 
 #define Identity2x2 Matrix2x2({1, 0}, {0, 1})
@@ -18,16 +18,13 @@ typedef unsigned int A_PIXEL;
 
 struct Matrix4x4;
 
-Matrix4x4* camera;
 float NearPlane = 0.1f;
 float FarPlane = 10.0f;
 float VerticalFOV = 90.0f;
-float AspectRatio = RasterHeight / RasterWidth;
-
-bool orbit = false;
+float AspectRatio = static_cast<float>(RasterHeight) / static_cast<float>(RasterWidth);
 
 unsigned int* Raster = nullptr;
-float totalTime = 0;
+Matrix4x4* camera;
 
 struct Vector2 {
 	union {
