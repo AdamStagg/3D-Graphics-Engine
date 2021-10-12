@@ -1,7 +1,7 @@
 #pragma once
 
-#define RasterWidth 500
-#define RasterHeight 500
+#define RasterWidth 400
+#define RasterHeight 400
 #define RasterPixelCount (RasterWidth * RasterHeight)
 
 #define Identity2x2 Matrix2x2({1, 0}, {0, 1})

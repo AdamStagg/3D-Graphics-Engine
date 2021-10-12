@@ -94,38 +94,37 @@ int main() {
 		timer.Signal();
 		totalTime += timer.Delta();
 		ClearColor(Raster, RasterPixelCount, 0xFF000000);
-		
-		//APPLY GRID SHADER
-		VertexShader = VS_World;
-		SV_WorldMatrix = Identity4x4;
-		SV_WorldMatrix = BuildXRotationMatrix(.8);
 
-		//DRAW GRID
-		for (size_t i = 0; i < 11; i++)
+
+
+
+		for (size_t i = 0; i < 360 * 20; i++)
 		{
-			Bresenham(gridPoints[i], gridPoints[i + 11], gridPoints[0].color);
-			Bresenham(gridPoints[i + 22], gridPoints[i + 33], gridPoints[0].color);
+			float x = sin(i / 180.0f * 3.14159);
+			float y = cos(i / 180.0f * 3.14159);
+
+			float z = lerp(1, 10, i / (360.0f * 20));
+
+			x /= z;
+			y /= z;
+			Vector2 pos = NDCtoScreen(Vertex(x, y, 0, 0, 0));
+
+
+			unsigned int alpha = 0x000000FF;
+			unsigned int red = 0x00000011;
+			unsigned int green = 0x000000F7;
+			unsigned int blue = 0x000000C1;
+
+			unsigned int finalA = ((static_cast<int>(0) - static_cast<int>(alpha)) * lerp(0, 1, i / (360.0f * 20)) + alpha);
+			unsigned int finalR = ((static_cast<int>(0) - static_cast<int>(red)) * lerp(0, 1, i / (360.0f * 20)) + red);
+			unsigned int finalG = ((static_cast<int>(0) - static_cast<int>(green)) * lerp(0, 1, i / (360.0f * 20)) + green);
+			unsigned int finalB = ((static_cast<int>(0) - static_cast<int>(blue)) * lerp(0, 1, i / (360.0f * 20)) + blue);
+
+
+			unsigned int finalColor = finalA << 24 | finalR << 16 | finalG << 8 | finalB;
+
+			PlotPixel(Raster, RasterWidth, pos, finalColor);
 		}
-
-
-		//APPLY CUBE SHADER
-		VertexShader = VS_World;
-		Matrix4x4 rotMat = BuildYRotationMatrix(totalTime);
-		rotMat = MatrixMULTMatrix(rotMat, BuildXRotationMatrix(.8));
-		Matrix4x4 tranMat = Matrix4x4({ 1, 0, 0, 0 }, { 0, 1, 0, 0 }, { 0, 0, 1, 0 }, { 0, -.25, 0, 1 });
-		rotMat = MatrixMULTMatrix(rotMat, tranMat);
-
-		SV_WorldMatrix = rotMat;
-
-		//DRAW CUBE
-		for (size_t i = 0; i < 4; i++)
-		{
-			Bresenham(cubePoints[i], cubePoints[(i + 4)], cubePoints[0].color);
-			Bresenham(cubePoints[i], cubePoints[(i + 1) % 4], cubePoints[0].color);
-			Bresenham(cubePoints[i + 4], cubePoints[4 + (i + 1)%4], cubePoints[0].color);
-		}
-
-
 	}
 
 	RS_Shutdown();

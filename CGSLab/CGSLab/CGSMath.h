@@ -161,7 +161,7 @@ Matrix4x4 MatrixInverse(Matrix4x4 m) {
 Vertex NDCtoScreen(Vertex v) {
 	return Vertex(
 		(v.x + 1) * (RasterWidth >> 1),
-		(v.y + 1) * (RasterWidth >> 1),
+		(1- v.y) * (RasterWidth >> 1),
 		(v.z + 1) * (RasterWidth >> 1),
 		(v.w + 1) * (RasterWidth >> 1),
 		v.color
