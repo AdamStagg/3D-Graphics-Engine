@@ -25,3 +25,6 @@ void VS_PerspectiveCamera(Vertex& vert) {
 	vert.w = 1;
 }
 
+void PS_SetColor(A_PIXEL& color) {
+	color = color;
+}

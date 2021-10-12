@@ -8,71 +8,71 @@ int main() {
 
 	const Vertex trianglePoints[3]
 	{
-		Vertex(.5, .5, 0, 0, 0xFFFF0000),
-		Vertex(-.5, .5, 0, 0, 0xFF00FF00),
-		Vertex(0 , -.5, 0, 0, 0xFF0000FF)
+		Vertex(.5f, .5f, 0, 0, 0xFFFF0000),
+		Vertex(-.5f, .5f, 0, 0, 0xFF00FF00),
+		Vertex(0 , -.5f, 0, 0, 0xFF0000FF)
 	};
 
 	const Vertex gridPoints[] = {
 		//X change, close Z
-		Vertex(-.5, 0, -.5, 1, 0xFFFFFFFF),
-		Vertex(-.4, 0, -.5, 1, 0xFFFFFFFF),
-		Vertex(-.3, 0, -.5, 1, 0xFFFFFFFF),
-		Vertex(-.2, 0, -.5, 1, 0xFFFFFFFF),
-		Vertex(-.1, 0, -.5, 1, 0xFFFFFFFF),
-		Vertex(  0, 0, -.5, 1, 0xFFFFFFFF),
-		Vertex( .1, 0, -.5, 1, 0xFFFFFFFF),
-		Vertex( .2, 0, -.5, 1, 0xFFFFFFFF),
-		Vertex( .3, 0, -.5, 1, 0xFFFFFFFF),
-		Vertex( .4, 0, -.5, 1, 0xFFFFFFFF),
-		Vertex( .5, 0, -.5, 1, 0xFFFFFFFF),
+		Vertex(-.5f, 0, -.5f, 1, 0xFFFFFFFF),
+		Vertex(-.4f, 0, -.5f, 1, 0xFFFFFFFF),
+		Vertex(-.3f, 0, -.5f, 1, 0xFFFFFFFF),
+		Vertex(-.2f, 0, -.5f, 1, 0xFFFFFFFF),
+		Vertex(-.1f, 0, -.5f, 1, 0xFFFFFFFF),
+		Vertex(0.0f, 0, -.5f, 1, 0xFFFFFFFF),
+		Vertex( .1f, 0, -.5f, 1, 0xFFFFFFFF),
+		Vertex( .2f, 0, -.5f, 1, 0xFFFFFFFF),
+		Vertex( .3f, 0, -.5f, 1, 0xFFFFFFFF),
+		Vertex( .4f, 0, -.5f, 1, 0xFFFFFFFF),
+		Vertex( .5f, 0, -.5f, 1, 0xFFFFFFFF),
 		//X change, far Z
-		Vertex(-.5, 0, .5, 1, 0xFFFFFFFF),
-		Vertex(-.4, 0, .5, 1, 0xFFFFFFFF),
-		Vertex(-.3, 0, .5, 1, 0xFFFFFFFF),
-		Vertex(-.2, 0, .5, 1, 0xFFFFFFFF),
-		Vertex(-.1, 0, .5, 1, 0xFFFFFFFF),
-		Vertex(  0, 0, .5, 1, 0xFFFFFFFF),
-		Vertex( .1, 0, .5, 1, 0xFFFFFFFF),
-		Vertex( .2, 0, .5, 1, 0xFFFFFFFF),
-		Vertex( .3, 0, .5, 1, 0xFFFFFFFF),
-		Vertex( .4, 0, .5, 1, 0xFFFFFFFF),
-		Vertex( .5, 0, .5, 1, 0xFFFFFFFF),
+		Vertex(-.5f, 0, .5f, 1, 0xFFFFFFFF),
+		Vertex(-.4f, 0, .5f, 1, 0xFFFFFFFF),
+		Vertex(-.3f, 0, .5f, 1, 0xFFFFFFFF),
+		Vertex(-.2f, 0, .5f, 1, 0xFFFFFFFF),
+		Vertex(-.1f, 0, .5f, 1, 0xFFFFFFFF),
+		Vertex(  0, 0, .5f, 1, 0xFFFFFFFF),
+		Vertex( .1f, 0, .5f, 1, 0xFFFFFFFF),
+		Vertex( .2f, 0, .5f, 1, 0xFFFFFFFF),
+		Vertex( .3f, 0, .5f, 1, 0xFFFFFFFF),
+		Vertex( .4f, 0, .5f, 1, 0xFFFFFFFF),
+		Vertex( .5f, 0, .5f, 1, 0xFFFFFFFF),
 		//Left X changing Z
-		Vertex(-.5, 0,-.5, 1, 0xFFFFFFFF),
-		Vertex(-.5, 0,-.4, 1, 0xFFFFFFFF),
-		Vertex(-.5, 0,-.3, 1, 0xFFFFFFFF),
-		Vertex(-.5, 0,-.2, 1, 0xFFFFFFFF),
-		Vertex(-.5, 0,-.1, 1, 0xFFFFFFFF),
-		Vertex(-.5, 0,  0, 1, 0xFFFFFFFF),
-		Vertex(-.5, 0, .1, 1, 0xFFFFFFFF),
-		Vertex(-.5, 0, .2, 1, 0xFFFFFFFF),
-		Vertex(-.5, 0, .3, 1, 0xFFFFFFFF),
-		Vertex(-.5, 0, .4, 1, 0xFFFFFFFF),
-		Vertex(-.5, 0, .5, 1, 0xFFFFFFFF),
+		Vertex(-.5f, 0,-.5f, 1, 0xFFFFFFFF),
+		Vertex(-.5f, 0,-.4f, 1, 0xFFFFFFFF),
+		Vertex(-.5f, 0,-.3f, 1, 0xFFFFFFFF),
+		Vertex(-.5f, 0,-.2f, 1, 0xFFFFFFFF),
+		Vertex(-.5f, 0,-.1f, 1, 0xFFFFFFFF),
+		Vertex(-.5f, 0,  0, 1, 0xFFFFFFFF),
+		Vertex(-.5f, 0, .1f, 1, 0xFFFFFFFF),
+		Vertex(-.5f, 0, .2f, 1, 0xFFFFFFFF),
+		Vertex(-.5f, 0, .3f, 1, 0xFFFFFFFF),
+		Vertex(-.5f, 0, .4f, 1, 0xFFFFFFFF),
+		Vertex(-.5f, 0, .5f, 1, 0xFFFFFFFF),
 		//Right X changing Z
-Vertex(.5, 0, -.5, 1, 0xFFFFFFFF),
-Vertex(.5, 0, -.4, 1, 0xFFFFFFFF),
-Vertex(.5, 0, -.3, 1, 0xFFFFFFFF),
-Vertex(.5, 0, -.2, 1, 0xFFFFFFFF),
-Vertex(.5, 0, -.1, 1, 0xFFFFFFFF),
-Vertex(.5, 0, 0, 1, 0xFFFFFFFF),
-Vertex(.5, 0, .1, 1, 0xFFFFFFFF),
-Vertex(.5, 0, .2, 1, 0xFFFFFFFF),
-Vertex(.5, 0, .3, 1, 0xFFFFFFFF),
-Vertex(.5, 0, .4, 1, 0xFFFFFFFF),
-Vertex(.5, 0, .5, 1, 0xFFFFFFFF)
+Vertex(.5f, 0, -.5f, 1, 0xFFFFFFFF),
+Vertex(.5f, 0, -.4f, 1, 0xFFFFFFFF),
+Vertex(.5f, 0, -.3f, 1, 0xFFFFFFFF),
+Vertex(.5f, 0, -.2f, 1, 0xFFFFFFFF),
+Vertex(.5f, 0, -.1f, 1, 0xFFFFFFFF),
+Vertex(.5f, 0, 0, 1, 0xFFFFFFFF),
+Vertex(.5f, 0, .1f, 1, 0xFFFFFFFF),
+Vertex(.5f, 0, .2f, 1, 0xFFFFFFFF),
+Vertex(.5f, 0, .3f, 1, 0xFFFFFFFF),
+Vertex(.5f, 0, .4f, 1, 0xFFFFFFFF),
+Vertex(.5f, 0, .5f, 1, 0xFFFFFFFF)
 	};
 
 	const Vertex cubePoints[] = {
-		Vertex(-.25, -.25, -.25, 1, 0xFF00FF00),
-		Vertex(.25, -.25, -.25,  1, 0xFF00FF00),
-		Vertex(.25, -.25,  .25,  1, 0xFF00FF00),
-		Vertex(-.25, -.25,  .25, 1, 0xFF00FF00),
-		Vertex(-.25,  .25, -.25, 1, 0xFF00FF00),
-		Vertex(.25,  .25, -.25,  1, 0xFF00FF00),
-		Vertex(.25,  .25,  .25,  1, 0xFF00FF00),
-		Vertex(-.25,  .25,  .25, 1, 0xFF00FF00)
+		Vertex(-.25f,	-.25f, -.25f,	1, 0xFF00FF00),
+		Vertex(.25f,	-.25f, -.25f,	1, 0xFF00FF00),
+		Vertex(.25f,	-.25f,  .25f,	1, 0xFF00FF00),
+		Vertex(-.25f,	-.25f,  .25f,	1, 0xFF00FF00),
+		Vertex(-.25f,	 .25f, -.25f,	1, 0xFF00FF00),
+		Vertex(.25f,	 .25f, -.25f,	1, 0xFF00FF00),
+		Vertex(.25f,	 .25f,  .25f,	1, 0xFF00FF00),
+		Vertex(-.25f,	 .25f,  .25f,	1, 0xFF00FF00)
 	};
 
 	//const Vertex cameraPoint(0, 0, 0, 0, 0);
@@ -98,7 +98,7 @@ Vertex(.5, 0, .5, 1, 0xFFFFFFFF)
 	{
 		//Initialization
 		timer.Signal();
-		totalTime += timer.Delta();
+		totalTime += static_cast<float>(timer.Delta());
 		ClearColor(Raster, RasterPixelCount, 0xFF000000);
 
 
@@ -133,7 +133,7 @@ Vertex(.5, 0, .5, 1, 0xFFFFFFFF)
 			Bresenham(cubePoints[i + 4], cubePoints[4 + (i + 1) % 4], cubePoints[0].color);
 		}
 		if (orbit) {
-			Matrix4x4 secondCube = Matrix4x4({ .2, 0, 0, 0 }, { 0, .2, 0, 0 }, { 0, 0, .2, 0 }, { .5, -.8, 0, 1 });
+			Matrix4x4 secondCube = Matrix4x4({ .2f, 0, 0, 0 }, { 0, .2f, 0, 0 }, { 0, 0, .2f, 0 }, { .5f, -.8f, 0, 1 });
 			secondCube = MatrixMULTMatrix(BuildYRotationMatrix(-totalTime), secondCube);
 			secondCube = MatrixMULTMatrix(BuildXRotationMatrix(totalTime * 2), secondCube);
 			secondCube = MatrixMULTMatrix(secondCube, cubeViewMatrix);

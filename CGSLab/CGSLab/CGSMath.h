@@ -38,9 +38,9 @@ unsigned int colorLerp(unsigned int _color1, unsigned int _color2, float ratio) 
 	unsigned int g2 = (_color2 & 0x0000FF00) >> 8;
 	unsigned int b2 = (_color2 & 0x000000FF);
 
-	unsigned int blendedRed = (static_cast<int>(r2) - static_cast<int>(r1)) * ratio + r1;
-	unsigned int blendedGreen = (static_cast<int>(g2) - static_cast<int>(g1)) * ratio + g1;
-	unsigned int blendedBlue = (static_cast<int>(b2) - static_cast<int>(b1)) * ratio + b1;
+	unsigned int blendedRed =	static_cast<unsigned int>((static_cast<int>(r2) - static_cast<int>(r1)) * ratio + r1);
+	unsigned int blendedGreen = static_cast<unsigned int>((static_cast<int>(g2) - static_cast<int>(g1)) * ratio + g1);
+	unsigned int blendedBlue =	static_cast<unsigned int>((static_cast<int>(b2) - static_cast<int>(b1)) * ratio + b1);
 
 	return 0xFF000000 | blendedRed << 16 | blendedGreen << 8 | blendedBlue;
 
@@ -83,6 +83,32 @@ unsigned int colorLerp(unsigned int _color, unsigned int _ogcolor) {
 
 	//return the result
 	return blendedalpha << 24 | blendedred << 16 | blendedgreen << 8 | blendedblue;
+}
+
+unsigned int colorBerp(Vector3 bya, unsigned int color1, unsigned int color2, unsigned int color3) {
+
+	unsigned int color1A = (color1 & 0xFF000000) >> 24;
+	unsigned int color2A = (color2 & 0xFF000000) >> 24;
+	unsigned int color3A = (color3 & 0xFF000000) >> 24;
+
+	unsigned int color1R = (color1 & 0x00FF0000) >> 16;
+	unsigned int color2R = (color2 & 0x00FF0000) >> 16;
+	unsigned int color3R = (color3 & 0x00FF0000) >> 16;
+
+	unsigned int color1G = (color1 & 0x0000FF00) >> 8;
+	unsigned int color2G = (color2 & 0x0000FF00) >> 8;
+	unsigned int color3G = (color3 & 0x0000FF00) >> 8;
+
+	unsigned int color1B = (color1 & 0x000000FF);
+	unsigned int color2B = (color2 & 0x000000FF);
+	unsigned int color3B = (color3 & 0x000000FF);
+
+	unsigned int finalA = (static_cast<unsigned int>(bya.x * color1A + bya.y * color2A + bya.z * color3A)) << 24;
+	unsigned int finalR = (static_cast<unsigned int>(bya.x * color1R + bya.y * color2R + bya.z * color3R)) << 16;
+	unsigned int finalG = (static_cast<unsigned int>(bya.x * color1G + bya.y * color2G + bya.z * color3G)) << 8;
+	unsigned int finalB = (static_cast<unsigned int>(bya.x * color1B + bya.y * color2B + bya.z * color3B));
+
+	return finalA | finalR | finalG | finalB;
 }
 //Implicit Line Equation
 float ImplicitLineEquation(Vector2 _test, Vector2 _start, Vector2 _end) {
@@ -129,6 +155,16 @@ Vertex VectorMULTMatrix(Vertex vect, Matrix4x4 matrix) {
 	};
 }
 
+Vertex VectorMULTMatrix(Vertex vect, Matrix3x3 matrix) {
+	return Vertex
+	(
+		/*x*/vect.x * matrix.matrix[0].x + vect.y * matrix.matrix[1].x + vect.z * matrix.matrix[2].x,
+		/*y*/vect.x * matrix.matrix[0].y + vect.y * matrix.matrix[1].y + vect.z * matrix.matrix[2].y,
+		/*z*/vect.x * matrix.matrix[0].z + vect.y * matrix.matrix[1].z + vect.z * matrix.matrix[2].z,
+		/*w*/0,
+		vect.color
+	);
+}
 Matrix3x3 MatrixMULTMatrix(Matrix3x3 m1, Matrix3x3 m2) {
 	return Matrix3x3
 	(
@@ -259,11 +295,11 @@ Matrix4x4 OrthogonalAffineInverse(const Matrix4x4& matrix) {
 }
 
 float DegToRad(float degrees) {
-	return (degrees * (PI / 180.0f));
+	return (degrees * (static_cast<float>(PI) / 180.0f));
 }
 
 float RadToDeg(float radians) {
-	return (radians * (180.0f / PI));
+	return (radians * (180.0f / static_cast<float>(PI)));
 }
 
 Matrix4x4 BuildProjectionMatrix(float FOV, float nearPlane, float farPlane, float aspectRatio) {
@@ -273,5 +309,25 @@ Matrix4x4 BuildProjectionMatrix(float FOV, float nearPlane, float farPlane, floa
 		Vector4(0, cot(FOV), 0, 0),
 		Vector4(0, 0, (farPlane)/(farPlane-nearPlane), 1),
 		Vector4(0, 0, (-(farPlane * nearPlane))/(farPlane-nearPlane), 0)
+	);
+}
+
+Matrix4x4 BuildTranslationMatrix(float x, float y, float z) {
+	return Matrix4x4
+	(
+		{1, 0, 0, 0},
+		{0, 1, 0, 0},
+		{0, 0, 1, 0},
+		{x, y, z, 1}
+	);
+}
+
+Matrix4x4 BuildScaleMatrix(float xScale, float yScale, float zScale) {
+	return Matrix4x4
+	(
+		{ xScale, 0, 0, 0 },
+		{ 0, yScale, 0, 0 },
+		{ 0, 0, zScale, 0 },
+		{ 0, 0, 0, 1 }
 	);
 }
