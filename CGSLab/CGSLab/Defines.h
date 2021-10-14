@@ -1,5 +1,11 @@
 #pragma once
 
+#include <iostream>
+#include "XTime.h"
+#include "RasterSurface.h"
+#include <Windows.h>
+#include "celestial.h"
+
 #define PI 3.14159265358979323846
 
 #define RasterWidth 1024
@@ -16,15 +22,6 @@
 
 typedef unsigned int A_PIXEL;
 
-struct Matrix4x4;
-
-float NearPlane = 0.1f;
-float FarPlane = 10.0f;
-float VerticalFOV = 90.0f;
-float AspectRatio = static_cast<float>(RasterHeight) / static_cast<float>(RasterWidth);
-
-unsigned int* Raster = nullptr;
-Matrix4x4* camera;
 
 struct Vector2 {
 	union {
@@ -99,13 +96,18 @@ struct Vertex {
 			Vector4 values;
 		};
 	};
+	float u, v;
 	unsigned int color;
 	Vertex() {
 		values = Vector4();
+		u = 0;
+		v = 0;
 		color = 0xFF000000;
 	}
-	Vertex(float _x, float _y, float _z, float _w, A_PIXEL _color) {
+	Vertex(float _x, float _y, float _z, float _w, float _u, float _v, A_PIXEL _color) {
 		values = { _x, _y, _z, _w };
+		u = _u;
+		v = _v;
 		this->color = _color;
 	}
 	operator Vector4() { return Vector4(x, y, z, w); }
@@ -163,4 +165,91 @@ struct Matrix4x4 {
 	}
 	operator Matrix3x3() { return Matrix3x3((Vector3)matrix[0], (Vector3)matrix[1], (Vector3)matrix[2]); }
 	operator Matrix2x2() { return Matrix2x2((Vector2)matrix[0], (Vector2)matrix[1]); }
+};
+
+
+float NearPlane = 0.1f;
+float FarPlane = 10.0f;
+float VerticalFOV = 90.0f;
+float AspectRatio = static_cast<float>(RasterHeight) / static_cast<float>(RasterWidth);
+
+unsigned int* Raster = new unsigned int[RasterPixelCount];
+float* DepthBuffer = new float[RasterPixelCount];
+Matrix4x4 camera;
+XTime timer;
+
+int triangles[]{
+	0, 1, 4, 5, 1, 4, // front face
+	1, 2, 5, 6, 2, 5, // right face
+	2, 3, 6, 7, 3, 6,// back face
+	3, 0, 7, 4, 0, 7, // left face
+	0, 1, 3, 2, 1, 3, // top face
+	4, 5, 7, 6, 5, 7 // bottom face
+};
+
+int uvs[]{ //all the triangles are set up the same way so we can just reuse the same uvs
+	0, 0, 1, 0, 0, 1, //triangle 1
+	1, 1, 1, 0, 0, 1//triangle 2
+};
+
+const Vertex gridPoints[] = {
+	//X change, close Z
+	Vertex(-.5f, 0, -.5f, 1, 0, 0, 0xFFFFFFFF),
+	Vertex(-.4f, 0, -.5f, 1, 0, 0, 0xFFFFFFFF),
+	Vertex(-.3f, 0, -.5f, 1, 0, 0, 0xFFFFFFFF),
+	Vertex(-.2f, 0, -.5f, 1, 0, 0, 0xFFFFFFFF),
+	Vertex(-.1f, 0, -.5f, 1, 0, 0, 0xFFFFFFFF),
+	Vertex(0.0f, 0, -.5f, 1, 0, 0, 0xFFFFFFFF),
+	Vertex(.1f, 0, -.5f,  1, 0, 0, 0xFFFFFFFF),
+	Vertex(.2f, 0, -.5f,  1, 0, 0, 0xFFFFFFFF),
+	Vertex(.3f, 0, -.5f,  1, 0, 0, 0xFFFFFFFF),
+	Vertex(.4f, 0, -.5f,  1, 0, 0, 0xFFFFFFFF),
+	Vertex(.5f, 0, -.5f,  1, 0, 0, 0xFFFFFFFF),
+	//X change, far Z
+	Vertex(-.5f, 0, .5f,  1, 0, 0, 0xFFFFFFFF),
+	Vertex(-.4f, 0, .5f,  1, 0, 0, 0xFFFFFFFF),
+	Vertex(-.3f, 0, .5f,  1, 0, 0, 0xFFFFFFFF),
+	Vertex(-.2f, 0, .5f,  1, 0, 0, 0xFFFFFFFF),
+	Vertex(-.1f, 0, .5f,  1, 0, 0, 0xFFFFFFFF),
+	Vertex(0, 0, .5f, 1,	 0, 0, 0xFFFFFFFF),
+	Vertex(.1f, 0, .5f, 1,   0, 0, 0xFFFFFFFF),
+	Vertex(.2f, 0, .5f, 1,   0, 0, 0xFFFFFFFF),
+	Vertex(.3f, 0, .5f, 1,   0, 0, 0xFFFFFFFF),
+	Vertex(.4f, 0, .5f, 1,   0, 0, 0xFFFFFFFF),
+	Vertex(.5f, 0, .5f, 1,   0, 0, 0xFFFFFFFF),
+	//Left X changing Z
+	Vertex(-.5f, 0,-.5f, 1, 0, 0, 0xFFFFFFFF),
+	Vertex(-.5f, 0,-.4f, 1, 0, 0, 0xFFFFFFFF),
+	Vertex(-.5f, 0,-.3f, 1, 0, 0, 0xFFFFFFFF),
+	Vertex(-.5f, 0,-.2f, 1, 0, 0, 0xFFFFFFFF),
+	Vertex(-.5f, 0,-.1f, 1, 0, 0, 0xFFFFFFFF),
+	Vertex(-.5f, 0,  0,  1, 0, 0, 0xFFFFFFFF),
+	Vertex(-.5f, 0, .1f, 1, 0, 0, 0xFFFFFFFF),
+	Vertex(-.5f, 0, .2f, 1, 0, 0, 0xFFFFFFFF),
+	Vertex(-.5f, 0, .3f, 1, 0, 0, 0xFFFFFFFF),
+	Vertex(-.5f, 0, .4f, 1, 0, 0, 0xFFFFFFFF),
+	Vertex(-.5f, 0, .5f, 1, 0, 0, 0xFFFFFFFF),
+	//Right X changing Z
+	Vertex(.5f, 0, -.5f, 1, 0, 0, 0xFFFFFFFF),
+	Vertex(.5f, 0, -.4f, 1, 0, 0, 0xFFFFFFFF),
+	Vertex(.5f, 0, -.3f, 1, 0, 0, 0xFFFFFFFF),
+	Vertex(.5f, 0, -.2f, 1, 0, 0, 0xFFFFFFFF),
+	Vertex(.5f, 0, -.1f, 1, 0, 0, 0xFFFFFFFF),
+	Vertex(.5f, 0, 0,    1, 0, 0, 0xFFFFFFFF),
+	Vertex(.5f, 0, .1f,  1, 0, 0, 0xFFFFFFFF),
+	Vertex(.5f, 0, .2f,  1, 0, 0, 0xFFFFFFFF),
+	Vertex(.5f, 0, .3f,  1, 0, 0, 0xFFFFFFFF),
+	Vertex(.5f, 0, .4f,  1, 0, 0, 0xFFFFFFFF),
+	Vertex(.5f, 0, .5f,  1, 0, 0, 0xFFFFFFFF)
+};
+
+Vertex cubePoints[] = {
+	Vertex(-.25f,	-.25f, -.25f,	1, 0, 0, 0xFFFF0000),
+	Vertex(.25f,	-.25f, -.25f,	1, 0, 0, 0xFF00FF00),
+	Vertex(.25f,	-.25f,  .25f,	1, 0, 0, 0xFF0000FF),
+	Vertex(-.25f,	-.25f,  .25f,	1, 0, 0, 0xFFFF00FF),
+	Vertex(-.25f,	 .25f, -.25f,	1, 0, 0, 0xFFFFFF00),
+	Vertex(.25f,	 .25f, -.25f,	1, 0, 0, 0xFFFFFFFF),
+	Vertex(.25f,	 .25f,  .25f,	1, 0, 0, 0xFF00FFFF),
+	Vertex(-.25f,	 .25f,  .25f,	1, 0, 0, 0xFF000000)
 };

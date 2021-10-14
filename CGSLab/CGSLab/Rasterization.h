@@ -6,10 +6,14 @@ void PlotPixel( const int _rasterIndex, const unsigned int _color) {
 	Raster[_rasterIndex] = _color;
 }
 
-void PlotPixel(const Vector2 _pos, const unsigned int _color) {
+void PlotPixel(const Vertex _pos, const unsigned int _color) {
 	if (_pos.x >= 0 && _pos.x < RasterWidth && _pos.y >= 0 && _pos.y < RasterHeight)
 	{
-			Raster[ConvertDimension(_pos, RasterWidth)] = _color;
+		int index = ConvertDimension(_pos.x, _pos.y, RasterWidth);
+		if (_pos.z < DepthBuffer[index]) {
+			DepthBuffer[index] = _pos.z;
+			Raster[index] = _color;
+		}
 	}
 }
 
@@ -18,6 +22,13 @@ void ClearColor(unsigned int _color) {
 	for (int i = 0; i < RasterPixelCount; i++)
 	{
 		Raster[i] = _color;
+	}
+}
+
+void ClearDepth(float depth = 1) {
+	for (size_t i = 0; i < RasterPixelCount; i++)
+	{
+		DepthBuffer[i] = depth;
 	}
 }
 
@@ -31,8 +42,8 @@ void Bresenham(const Vertex& _startPos, const Vertex& _endPos, const unsigned in
 		VertexShader(copy_end);
 	}
 
-	Vector2 screen_start = NDCtoScreen(copy_start);
-	Vector2 screen_end = NDCtoScreen(copy_end);
+	Vertex screen_start = NDCtoScreen(copy_start);
+	Vertex screen_end = NDCtoScreen(copy_end);
 
 	int currX = static_cast<int>(screen_start.x);
 	int currY = static_cast<int>(screen_start.y);
@@ -75,10 +86,12 @@ void Bresenham(const Vertex& _startPos, const Vertex& _endPos, const unsigned in
 		A_PIXEL copyColor = _color;
 
 		if (PixelShader) {
-			PixelShader(copyColor);
+			PixelShader(copyColor, 0, 0);
 		}
-
-		PlotPixel(isXDominant ? Vector2(static_cast<float>(curr), static_cast<float>(currY)) : Vector2(static_cast<float>(currX), static_cast<float>(curr)), copyColor);
+		if (end != 0) {
+			float z = lerpf(screen_start.z, screen_end.z, (start + curr) / end);
+		PlotPixel(isXDominant ? Vertex(static_cast<float>(curr), static_cast<float>(currY), z, 1, 0, 0, 0) : Vertex(static_cast<float>(currX), static_cast<float>(curr), z, 1, 0, 0, 0), copyColor);
+		}
 		error += slope;
 		if (error > 0.5f) {
 			isXDominant ? currY += inc : currX += inc;
@@ -145,7 +158,7 @@ void MidPoint(const Vector2 _startPos, const Vector2 _endPos, const unsigned int
 
 	for (curr = start; curr <= end; curr++)
 	{
-		PlotPixel(isXDominant ? Vector2(static_cast<float>(curr), static_cast<float>(currY)) : Vector2(static_cast<float>(currX), static_cast<float>(curr)), _color);
+		PlotPixel(isXDominant ? Vertex(static_cast<float>(curr), static_cast<float>(currY), 0, 0, 0, 0, 0) : Vertex(static_cast<float>(currX), static_cast<float>(curr), 0, 0, 0, 0, 0), _color);
 		Vector4 mid(isXDominant ? curr + xInc : currX + xInc, isXDominant ? currY + yInc : curr + yInc, 0, 0);
 		if (toggle * ((yTogg * static_cast<int>(_endPos.x - _startPos.x)) < 0 ? ImplicitLineEquation(mid, _end, _start) : ImplicitLineEquation(mid, _start, _end)) < 0) {
 			isXDominant ? currY += inc : currX += inc;
@@ -198,7 +211,7 @@ void Parametric(const Vector2 _start, const Vector2 _end, const unsigned int _co
 	{
 		float ratio = (curr - start) / static_cast<float>(end - start);
 		isXDominant ? currY = lerp(static_cast<int>(start2), static_cast<int>(end2), ratio) : currX = lerp(static_cast<int>(start2), static_cast<int>(end2), ratio);
-		PlotPixel(Vector2(static_cast<float>(isXDominant ? curr : floor(currX + 0.5)), static_cast<float>(isXDominant ? floor(currY + 0.5f) : curr)), colorLerp(_color1, _color2, ratio));
+		PlotPixel(Vertex(static_cast<float>(isXDominant ? curr : floor(currX + 0.5)), static_cast<float>(isXDominant ? floor(currY + 0.5f) : curr), 0, 0, 0, 0, 0), colorLerp(_color1, _color2, ratio));
 	}
 }
 
@@ -219,29 +232,63 @@ void FillTriangle(const Vertex& p1, const Vertex& p2, const Vertex& p3) {
 	Vertex screen_p3 = NDCtoScreen(copy_p3);
 
 
-	float startX =	std::min(std::min(screen_p1.x, screen_p2.x), screen_p3.x);
-	float startY =	std::min(std::min(screen_p1.y, screen_p2.y), screen_p3.y);
-	float endX =	std::max(std::max(screen_p1.x, screen_p2.x), screen_p3.x);
-	float endY =	std::max(std::max(screen_p1.y, screen_p2.y), screen_p3.y);
+	int startX =	min(min(screen_p1.x, screen_p2.x), screen_p3.x);
+	int startY =	min(min(screen_p1.y, screen_p2.y), screen_p3.y);
+	int endX =	max(max(screen_p1.x, screen_p2.x), screen_p3.x);
+	int endY =	max(max(screen_p1.y, screen_p2.y), screen_p3.y);
 
-	for (float x = startX; x < endX; x++)
+	for (float x = startX; x <= endX; x++)
 	{
-		for (float y = startY; y < endY; y++)
+		for (float y = startY; y <= endY; y++)
 		{
-			Vector4 bya = FindBarycentric(screen_p1, screen_p2, screen_p3, Vector2(x, y));
+			Vertex bya = FindBarycentric(screen_p1, screen_p2, screen_p3, Vector2(x, y));
 			if (bya.x >= 0 && bya.x <= 1 &&
 				bya.y >= 0 && bya.y <= 1 &&
 				bya.z >= 0 && bya.z <= 1)
 			{
-				A_PIXEL berpedColor = colorBerp(bya, screen_p1.color, screen_p2.color, screen_p3.color);
-
+				//float z = berpf(bya, screen_p1.z, screen_p2.z, screen_p3.z);
+				Vertex barycentric = berp(bya, screen_p1, screen_p2, screen_p3);
+				//float w = berpf(bya, p1.w, p2.w, p3.w);
+				//unsigned int berpColor = colorBerp(bya, screen_p1.color, screen_p2.color, screen_p3.color);
 				if (PixelShader) {
-					PixelShader(berpedColor);
+					PixelShader(barycentric.color, barycentric.u, barycentric.v);
 				}
 
-				PlotPixel(Vector2(x, y), berpedColor);
+				PlotPixel(Vertex(x, y, barycentric.z, 0, barycentric.u, barycentric.v, 0), barycentric.color);
 			}
 		}
 	}
 
+}
+
+void DrawGrid() {
+	for (size_t i = 0; i < 11; i++)
+	{
+		Bresenham(gridPoints[i], gridPoints[i + 11], gridPoints[0].color);
+		Bresenham(gridPoints[i + 22], gridPoints[i + 33], gridPoints[0].color);
+	}
+}
+
+void DrawCube() {
+	for (size_t i = 0; i < sizeof(triangles) / sizeof(triangles[0]); i += 3)
+	{
+		if (i % 2 == 0) { //Set UVS of triangle 1
+			cubePoints[triangles[i]].u = uvs[0];
+			cubePoints[triangles[i]].v = uvs[1];
+			cubePoints[triangles[i + 1]].u = uvs[2];
+			cubePoints[triangles[i + 1]].v = uvs[3];
+			cubePoints[triangles[i + 2]].u = uvs[4];
+			cubePoints[triangles[i + 2]].v = uvs[5];
+		}
+		else { //set UVS of triangle2
+			cubePoints[triangles[i]].u = uvs[6];
+			cubePoints[triangles[i]].v = uvs[7];
+			cubePoints[triangles[i + 1]].u = uvs[8];
+			cubePoints[triangles[i + 1]].v = uvs[9];
+			cubePoints[triangles[i + 2]].u = uvs[10];
+			cubePoints[triangles[i + 2]].v = uvs[11];
+		}
+		//Draw Triangle
+		FillTriangle(cubePoints[triangles[i]], cubePoints[triangles[i + 1]], cubePoints[triangles[i + 2]]);
+	}
 }

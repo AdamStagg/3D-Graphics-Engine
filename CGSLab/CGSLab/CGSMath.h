@@ -27,6 +27,9 @@ float lerp(int start, int end, float ratio) {
 	return (end - start) * ratio + start;
 }
 
+float lerpf(float start, float end, float ratio) {
+	return (end - start) * ratio + start;
+}
 //Interpolates two colors based on a given ratio
 unsigned int colorLerp(unsigned int _color1, unsigned int _color2, float ratio) {
 
@@ -44,6 +47,10 @@ unsigned int colorLerp(unsigned int _color1, unsigned int _color2, float ratio) 
 
 	return 0xFF000000 | blendedRed << 16 | blendedGreen << 8 | blendedBlue;
 
+}
+
+unsigned int BGRAtoARGB(unsigned int _color) {
+	return ((_color & 0x000000FF) << 24) | ((_color & 0x0000ff00) << 8) | ((_color & 0x00ff0000) >> 8) | ((_color & 0xff000000) >> 24);
 }
 //Interpolates two colors based on alpha
 unsigned int colorLerp(unsigned int _color, unsigned int _ogcolor) {
@@ -95,19 +102,37 @@ unsigned int colorBerp(Vector3 bya, unsigned int color1, unsigned int color2, un
 	unsigned int color2B = (color2 & 0x000000FF);
 	unsigned int color3B = (color3 & 0x000000FF);
 
-	unsigned int finalA = (static_cast<unsigned int>(bya.x * color1A + bya.y * color2A + bya.z * color3A)) << 24;
-	unsigned int finalR = (static_cast<unsigned int>(bya.x * color1R + bya.y * color2R + bya.z * color3R)) << 16;
-	unsigned int finalG = (static_cast<unsigned int>(bya.x * color1G + bya.y * color2G + bya.z * color3G)) << 8;
-	unsigned int finalB = (static_cast<unsigned int>(bya.x * color1B + bya.y * color2B + bya.z * color3B));
+	unsigned int finalA = (static_cast<unsigned int>(bya.z * color1A + bya.x * color2A + bya.y * color3A)) << 24;
+	unsigned int finalR = (static_cast<unsigned int>(bya.z * color1R + bya.x * color2R + bya.y * color3R)) << 16;
+	unsigned int finalG = (static_cast<unsigned int>(bya.z * color1G + bya.x * color2G + bya.y * color3G)) << 8;
+	unsigned int finalB = (static_cast<unsigned int>(bya.z * color1B + bya.x * color2B + bya.y * color3B));
 
 	return finalA | finalR | finalG | finalB;
 }
+
+Vertex berp(Vertex ratios, Vertex p1, Vertex p2, Vertex p3) {
+	return Vertex
+	(
+		ratios.z * p1.x + ratios.x * p2.x + ratios.y * p3.x,
+		ratios.z * p1.y + ratios.x * p2.y + ratios.y * p3.y,
+		ratios.z * p1.z + ratios.x * p2.z + ratios.y * p3.z,
+		1,
+		ratios.z * p1.u + ratios.x * p2.u + ratios.y * p3.u,
+		ratios.z * p1.v + ratios.x * p2.v + ratios.y * p3.v,
+		colorBerp(ratios, p1.color, p2.color, p3.color)
+	);
+}
+
+float berpf(Vertex ratios, float p1, float p2, float p3) {
+	return (ratios.z * p1 + ratios.x * p2 + ratios.y * p3);
+}
+
 //Implicit Line Equation
 float ImplicitLineEquation(Vector2 _test, Vector2 _start, Vector2 _end) {
 	return (_start.y - _end.y) * _test.x + (_end.x - _start.x) * _test.y + (_start.x * _end.y - _start.y * _end.x);
 }
 //Finds the Barycentric coordinates from 3 given points
-Vector4 FindBarycentric(Vertex pointA, Vertex pointB, Vertex pointC, Vector2 curr) {
+Vertex FindBarycentric(Vertex pointA, Vertex pointB, Vertex pointC, Vector2 curr) {
 	float beta	= ImplicitLineEquation(pointB, pointA, pointC);
 	float gamma = ImplicitLineEquation(pointC, pointB, pointA);
 	float alpha = ImplicitLineEquation(pointA, pointC, pointB);
@@ -116,7 +141,7 @@ Vector4 FindBarycentric(Vertex pointA, Vertex pointB, Vertex pointC, Vector2 cur
 	float b		= ImplicitLineEquation(curr, pointA, pointC);
 	float y		= ImplicitLineEquation(curr, pointB, pointA);
 	float a		= ImplicitLineEquation(curr, pointC, pointB);
-	return Vector4(b/beta, y/gamma, a/alpha, 0);
+	return Vertex(b/beta, y/gamma, a/alpha, 0, 0, 0, 0);
 }
 
 Vector3 VectorMULTMatrix(Vector3 vect, Matrix3x3 matrix) {
@@ -143,6 +168,8 @@ Vertex VectorMULTMatrix(Vertex vect, Matrix4x4 matrix) {
 		/*y*/vect.x * matrix.matrix[0].y + vect.y * matrix.matrix[1].y + vect.z * matrix.matrix[2].y + vect.w * matrix.matrix[3].y,
 		/*z*/vect.x * matrix.matrix[0].z + vect.y * matrix.matrix[1].z + vect.z * matrix.matrix[2].z + vect.w * matrix.matrix[3].z,
 		/*w*/vect.x * matrix.matrix[0].w + vect.y * matrix.matrix[1].w + vect.z * matrix.matrix[2].w + vect.w * matrix.matrix[3].w,
+		vect.u, 
+		vect.v,
 		vect.color
 	};
 }
@@ -154,6 +181,8 @@ Vertex VectorMULTMatrix(Vertex vect, Matrix3x3 matrix) {
 		/*y*/vect.x * matrix.matrix[0].y + vect.y * matrix.matrix[1].y + vect.z * matrix.matrix[2].y,
 		/*z*/vect.x * matrix.matrix[0].z + vect.y * matrix.matrix[1].z + vect.z * matrix.matrix[2].z,
 		/*w*/0,
+		vect.u,
+		vect.v,
 		vect.color
 	);
 }
@@ -192,6 +221,8 @@ Vertex NDCtoScreen(const Vertex& v) {
 		(1 - v.y) * (RasterHeight >> 1),
 		v.z,
 		v.w,
+		v.u,
+		v.v,
 		v.color
 	);
 }
