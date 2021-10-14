@@ -1,5 +1,6 @@
 #pragma once
 #include "Shaders.h"
+#include <math.h>
 
 
 void PlotPixel(const int _rasterIndex, const unsigned int _color) {
@@ -45,59 +46,79 @@ void Bresenham(const Vertex& _startPos, const Vertex& _endPos, const unsigned in
 	Vertex screen_start = NDCtoScreen(copy_start);
 	Vertex screen_end = NDCtoScreen(copy_end);
 
-	int currX = static_cast<int>(screen_start.x);
-	int currY = static_cast<int>(screen_start.y);
-	int curr, start, end;
-	float slope;
-
-	int startX = static_cast<int>(screen_start.x), endX = static_cast<int>(screen_end.x), startY = static_cast<int>(screen_start.y), endY = static_cast<int>(screen_end.y);
-	int inc = 1;
-
-	float slopeX = abs(static_cast<int>(screen_end.y - screen_start.y) / static_cast<float>(static_cast<int>(screen_end.x - screen_start.x)));
-	float slopeY = abs(static_cast<int>(screen_end.x - screen_start.x) / static_cast<float>(static_cast<int>(screen_end.y - screen_start.y)));
-	float error = 0;
-
-	bool isXDominant = abs(static_cast<int>(screen_end.y - screen_start.y) / static_cast<float>(static_cast<int>(screen_end.x - screen_start.x))) < 1;
-
-	if (static_cast<int>(screen_end.x - screen_start.x) < 0) {
-		Swap(&startX, &endX);
-		currY = static_cast<int>(screen_end.y);
-		inc = -inc;
-	}
-	if (static_cast<int>(screen_end.y - screen_start.y) < 0) {
-		Swap(&startY, &endY);
-		currX = static_cast<int>(screen_end.x);
-		inc = -inc;
-	}
-
-	if (isXDominant) {
-		start = startX;
-		end = endX;
-		slope = slopeX;
-	}
-	else {
-		start = startY;
-		end = endY;
-		slope = slopeY;
-	}
-
-	for (curr = start; curr <= end; curr++)
+	if (true)
 	{
-		A_PIXEL copyColor = _color;
+		int dx = (screen_end.x - screen_start.x);
+		int dy = (screen_end.y - screen_start.y);
+		unsigned int total = (std::abs(dx) > std::abs(dy)) ? std::abs(dx) : std::abs(dy);
+		for (size_t i = 0; i < total; i++)
+		{
+			float ratio = static_cast<float>(i) / total;
+			unsigned int curr_x = lerp(screen_start.x, screen_end.x, ratio);
+			unsigned int curr_y = lerp(screen_start.y, screen_end.y, ratio);
+			float curr_z = lerpf(screen_start.z, screen_end.z, ratio);
 
-		if (PixelShader) {
-			PixelShader(copyColor, 0, 0);
-		}
-		if (end != 0) {
-			float z = lerpf(screen_start.z, screen_end.z, (curr - start) / static_cast<float>((end - start)));
-			PlotPixel(isXDominant ? Vertex(static_cast<float>(curr), static_cast<float>(currY), z, 1, 0, 0, 0) : Vertex(static_cast<float>(currX), static_cast<float>(curr), z, 1, 0, 0, 0), copyColor);
-		}
-		error += slope;
-		if (error > 0.5f) {
-			isXDominant ? currY += inc : currX += inc;
-			error--;
+			A_PIXEL copyColor = _color;
+			if (PixelShader) {
+				PixelShader(copyColor, 0, 0);
+			}
+			PlotPixel(Vertex(static_cast<float>(curr_x), static_cast<float>(curr_y), curr_z, 1, 0, 0, 0), copyColor);
 		}
 	}
+
+	//int currX = static_cast<int>(screen_start.x);
+	//int currY = static_cast<int>(screen_start.y);
+	//int curr, start, end;
+	//float slope;
+
+	//int startX = static_cast<int>(screen_start.x), endX = static_cast<int>(screen_end.x), startY = static_cast<int>(screen_start.y), endY = static_cast<int>(screen_end.y);
+	//int inc = 1;
+
+	//float slopeX = abs(static_cast<int>(screen_end.y - screen_start.y) / static_cast<float>(static_cast<int>(screen_end.x - screen_start.x)));
+	//float slopeY = abs(static_cast<int>(screen_end.x - screen_start.x) / static_cast<float>(static_cast<int>(screen_end.y - screen_start.y)));
+	//float error = 0;
+
+	//bool isXDominant = abs(static_cast<int>(screen_end.y - screen_start.y) / static_cast<float>(static_cast<int>(screen_end.x - screen_start.x))) < 1;
+
+	//if (static_cast<int>(screen_end.x - screen_start.x) < 0) {
+	//	Swap(&startX, &endX);
+	//	currY = static_cast<int>(screen_end.y);
+	//	inc = -inc;
+	//}
+	//if (static_cast<int>(screen_end.y - screen_start.y) < 0) {
+	//	Swap(&startY, &endY);
+	//	currX = static_cast<int>(screen_end.x);
+	//	inc = -inc;
+	//}
+
+	//if (isXDominant) {
+	//	start = startX;
+	//	end = endX;
+	//	slope = slopeX;
+	//}
+	//else {
+	//	start = startY;
+	//	end = endY;
+	//	slope = slopeY;
+	//}
+
+	//for (curr = start; curr <= end; curr++)
+	//{
+	//	A_PIXEL copyColor = _color;
+
+	//	if (PixelShader) {
+	//		PixelShader(copyColor, 0, 0);
+	//	}
+	//	if (end != 0) {
+	//		float z = lerpf(screen_start.z, screen_end.z, (curr - start) / static_cast<float>((end - start)));
+	//		PlotPixel(isXDominant ? Vertex(static_cast<float>(curr), static_cast<float>(currY), z, 1, 0, 0, 0) : Vertex(static_cast<float>(currX), static_cast<float>(curr), z, 1, 0, 0, 0), copyColor);
+	//	}
+	//	error += slope;
+	//	if (error > 0.5f) {
+	//		isXDominant ? currY += inc : currX += inc;
+	//		error--;
+	//	}
+	//}
 }
 
 void MidPoint(const Vector2 _startPos, const Vector2 _endPos, const unsigned int _color) {
@@ -247,14 +268,19 @@ void FillTriangle(const Vertex& p1, const Vertex& p2, const Vertex& p3) {
 				bya.z >= 0 && bya.z <= 1)
 			{
 				//float z = berpf(bya, screen_p1.z, screen_p2.z, screen_p3.z);
+
 				Vertex barycentric = berp(bya, screen_p1, screen_p2, screen_p3);
+				float z = berp(bya, screen_p1.z, screen_p2.z, screen_p3.z);
+				float u = berp(bya, screen_p1.u / screen_p1.w, screen_p2.u / screen_p2.w, screen_p3.u / screen_p3.w);
+				float v = berp(bya, screen_p1.v / screen_p1.w, screen_p2.v / screen_p2.w, screen_p3.v / screen_p3.w);
+				float w = berp(bya, 1 / screen_p1.w, 1 / screen_p2.w, 1 / screen_p3.w);
 				//float w = berpf(bya, p1.w, p2.w, p3.w);
 				//unsigned int berpColor = colorBerp(bya, screen_p1.color, screen_p2.color, screen_p3.color);
 				if (PixelShader) {
-					PixelShader(barycentric.color, barycentric.u, barycentric.v);
+					PixelShader(barycentric.color, u/w, v/w);
 				}
 
-				PlotPixel(Vertex(x, y, barycentric.z, 0, barycentric.u, barycentric.v, 0), barycentric.color);
+				PlotPixel(Vertex(x, y, barycentric.z, 0, u / w, v/w, 0), barycentric.color);
 			}
 		}
 	}

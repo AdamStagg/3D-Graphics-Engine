@@ -116,11 +116,15 @@ Vertex berp(Vertex ratios, Vertex p1, Vertex p2, Vertex p3) {
 		ratios.x * p1.x + ratios.y * p2.x + ratios.z * p3.x,
 		ratios.x * p1.y + ratios.y * p2.y + ratios.z * p3.y,
 		ratios.x * p1.z + ratios.y * p2.z + ratios.z * p3.z,
-		1,
-		ratios.x * p1.u + ratios.y * p2.u + ratios.z * p3.u,
-		ratios.x * p1.v + ratios.y * p2.v + ratios.z * p3.v,
+		0,
+		0,
+		0,
 		colorBerp(ratios, p1.color, p2.color, p3.color)
 	);
+}
+
+float berp(Vertex ratios, float p1, float p2, float p3) {
+	return ratios.x * p1 + ratios.y * p2 + ratios.z * p3;
 }
 
 float berpf(Vertex ratios, float p1, float p2, float p3) {
