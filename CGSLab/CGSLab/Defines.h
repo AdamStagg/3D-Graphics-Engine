@@ -188,8 +188,8 @@ int triangles[]{
 };
 
 int uvs[]{ //all the triangles are set up the same way so we can just reuse the same uvs
-	0, 0, 1, 0, 0, 1, //triangle 1
-	1, 1, 1, 0, 0, 1//triangle 2
+	0, 1, 1, 1, 0, 0, //triangle 1
+	1, 0, 1, 1, 0, 0//triangle 2
 };
 
 const Vertex gridPoints[] = {

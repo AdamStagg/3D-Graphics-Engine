@@ -2,7 +2,7 @@
 #include "Shaders.h"
 
 
-void PlotPixel( const int _rasterIndex, const unsigned int _color) {
+void PlotPixel(const int _rasterIndex, const unsigned int _color) {
 	Raster[_rasterIndex] = _color;
 }
 
@@ -25,7 +25,7 @@ void ClearColor(unsigned int _color) {
 	}
 }
 
-void ClearDepth(float depth = 1) {
+void ClearDepth(float depth = 1.0f) {
 	for (size_t i = 0; i < RasterPixelCount; i++)
 	{
 		DepthBuffer[i] = depth;
@@ -89,8 +89,8 @@ void Bresenham(const Vertex& _startPos, const Vertex& _endPos, const unsigned in
 			PixelShader(copyColor, 0, 0);
 		}
 		if (end != 0) {
-			float z = lerpf(screen_start.z, screen_end.z, (start + curr) / end);
-		PlotPixel(isXDominant ? Vertex(static_cast<float>(curr), static_cast<float>(currY), z, 1, 0, 0, 0) : Vertex(static_cast<float>(currX), static_cast<float>(curr), z, 1, 0, 0, 0), copyColor);
+			float z = lerpf(screen_start.z, screen_end.z, (curr - start) / static_cast<float>((end - start)));
+			PlotPixel(isXDominant ? Vertex(static_cast<float>(curr), static_cast<float>(currY), z, 1, 0, 0, 0) : Vertex(static_cast<float>(currX), static_cast<float>(curr), z, 1, 0, 0, 0), copyColor);
 		}
 		error += slope;
 		if (error > 0.5f) {
@@ -232,10 +232,10 @@ void FillTriangle(const Vertex& p1, const Vertex& p2, const Vertex& p3) {
 	Vertex screen_p3 = NDCtoScreen(copy_p3);
 
 
-	int startX =	min(min(screen_p1.x, screen_p2.x), screen_p3.x);
-	int startY =	min(min(screen_p1.y, screen_p2.y), screen_p3.y);
-	int endX =	max(max(screen_p1.x, screen_p2.x), screen_p3.x);
-	int endY =	max(max(screen_p1.y, screen_p2.y), screen_p3.y);
+	int startX = min(min(screen_p1.x, screen_p2.x), screen_p3.x);
+	int startY = min(min(screen_p1.y, screen_p2.y), screen_p3.y);
+	int endX = max(max(screen_p1.x, screen_p2.x), screen_p3.x);
+	int endY = max(max(screen_p1.y, screen_p2.y), screen_p3.y);
 
 	for (float x = startX; x <= endX; x++)
 	{

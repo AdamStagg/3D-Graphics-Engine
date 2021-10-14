@@ -113,12 +113,12 @@ unsigned int colorBerp(Vector3 bya, unsigned int color1, unsigned int color2, un
 Vertex berp(Vertex ratios, Vertex p1, Vertex p2, Vertex p3) {
 	return Vertex
 	(
-		ratios.z * p1.x + ratios.x * p2.x + ratios.y * p3.x,
-		ratios.z * p1.y + ratios.x * p2.y + ratios.y * p3.y,
-		ratios.z * p1.z + ratios.x * p2.z + ratios.y * p3.z,
+		ratios.x * p1.x + ratios.y * p2.x + ratios.z * p3.x,
+		ratios.x * p1.y + ratios.y * p2.y + ratios.z * p3.y,
+		ratios.x * p1.z + ratios.y * p2.z + ratios.z * p3.z,
 		1,
-		ratios.z * p1.u + ratios.x * p2.u + ratios.y * p3.u,
-		ratios.z * p1.v + ratios.x * p2.v + ratios.y * p3.v,
+		ratios.x * p1.u + ratios.y * p2.u + ratios.z * p3.u,
+		ratios.x * p1.v + ratios.y * p2.v + ratios.z * p3.v,
 		colorBerp(ratios, p1.color, p2.color, p3.color)
 	);
 }
@@ -141,7 +141,7 @@ Vertex FindBarycentric(Vertex pointA, Vertex pointB, Vertex pointC, Vector2 curr
 	float b		= ImplicitLineEquation(curr, pointA, pointC);
 	float y		= ImplicitLineEquation(curr, pointB, pointA);
 	float a		= ImplicitLineEquation(curr, pointC, pointB);
-	return Vertex(b/beta, y/gamma, a/alpha, 0, 0, 0, 0);
+	return Vertex(a/alpha, b/beta, y/gamma, 0, 0, 0, 0);
 }
 
 Vector3 VectorMULTMatrix(Vector3 vect, Matrix3x3 matrix) {
@@ -328,8 +328,8 @@ float RadToDeg(float radians) {
 Matrix4x4 BuildProjectionMatrix(float FOV, float nearPlane, float farPlane, float aspectRatio) {
 	return Matrix4x4
 	(
-		Vector4((cot(FOV))*aspectRatio,	0,					0,												0),
-		Vector4(0,						cot(FOV),			0,												0),
+		Vector4((cot(DegToRad(FOV/2.0f)))*aspectRatio,	0,					0,												0),
+		Vector4(0,						cot(DegToRad(FOV/2.0f)),			0,												0),
 		Vector4(0,						0,					(farPlane)/(farPlane-nearPlane),				1),
 		Vector4(0,						0,					(-(farPlane * nearPlane))/(farPlane-nearPlane), 0)
 	);
