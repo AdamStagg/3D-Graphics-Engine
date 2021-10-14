@@ -54,17 +54,15 @@ unsigned int colorLerp(unsigned int _color, unsigned int _ogcolor) {
 
 	//code to optimize because a lot of sprites dont need to blend, if it is fully opaque or fully transparent
 	//if the ratio is 1, just return the new color
-	if (alpha / 255.0f == 1) {
+	if (alpha == 0x000000FF) {
 		return _color;
 	}
 	//if the ratio is 0 return the old color
-	else if (alpha / 255.0f == 0) {
+	else if (alpha == 0) {
 		return _ogcolor;
 	}
 
 	//new color rgb
-	unsigned int red   = (_color & 0x00FF0000) >> 16;
-	unsigned int green = (_color & 0x0000FF00) >> 8;
 	unsigned int blue  = (_color & 0x000000FF);
 
 	//old color values
@@ -73,11 +71,16 @@ unsigned int colorLerp(unsigned int _color, unsigned int _ogcolor) {
 	unsigned int oggreen = (_ogcolor & 0x0000FF00) >> 8;
 	unsigned int ogblue  = (_ogcolor & 0x000000FF);
 
+	int dr = (static_cast<int>((_color & 0x00FF0000) >> 16) - static_cast<int>(ogred));
+	int dg = (static_cast<int>((_color & 0x0000FF00) >> 8)	- static_cast<int>(oggreen));
+	int db = (static_cast<int>((_color & 0x000000FF))		- static_cast<int>(ogblue));
+	int da = (static_cast<int>(alpha)						- static_cast<int>(ogalpha));
+
 	//lerp blend
-	unsigned int blendedred = static_cast<unsigned int>(((static_cast<int>(red) - static_cast<int>(ogred)) * (alpha / 255.0f) + ogred));
-	unsigned int blendedgreen = static_cast<unsigned int>(((static_cast<int>(green) - static_cast<int>(oggreen)) * (alpha / 255.0f) + oggreen));
-	unsigned int blendedblue = static_cast<unsigned int>(((static_cast<int>(blue) - static_cast<int>(ogblue)) * (alpha / 255.0f) + ogblue));
-	unsigned int blendedalpha = static_cast<unsigned int>(((static_cast<int>(alpha) - static_cast<int>(ogalpha)) * (alpha / 255.0f) + ogalpha));
+	unsigned int blendedred =	static_cast<unsigned int>((dr * alpha) >> 8 + ogred);
+	unsigned int blendedgreen = static_cast<unsigned int>((dg * alpha) >> 8 + oggreen);
+	unsigned int blendedblue =	static_cast<unsigned int>((db * alpha) >> 8 + ogblue);
+	unsigned int blendedalpha = static_cast<unsigned int>((da * alpha) >> 8 + ogalpha);
 
 
 
@@ -103,10 +106,10 @@ unsigned int colorBerp(Vector3 bya, unsigned int color1, unsigned int color2, un
 	unsigned int color2B = (color2 & 0x000000FF);
 	unsigned int color3B = (color3 & 0x000000FF);
 
-	unsigned int finalA = (static_cast<unsigned int>(bya.x * color1A + bya.y * color2A + bya.z * color3A)) << 24;
-	unsigned int finalR = (static_cast<unsigned int>(bya.x * color1R + bya.y * color2R + bya.z * color3R)) << 16;
-	unsigned int finalG = (static_cast<unsigned int>(bya.x * color1G + bya.y * color2G + bya.z * color3G)) << 8;
-	unsigned int finalB = (static_cast<unsigned int>(bya.x * color1B + bya.y * color2B + bya.z * color3B));
+	unsigned int finalA = (static_cast<unsigned int>(bya.z * color1A + bya.x * color2A + bya.y * color3A)) << 24;
+	unsigned int finalR = (static_cast<unsigned int>(bya.z * color1R + bya.x * color2R + bya.y * color3R)) << 16;
+	unsigned int finalG = (static_cast<unsigned int>(bya.z * color1G + bya.x * color2G + bya.y * color3G)) << 8;
+	unsigned int finalB = (static_cast<unsigned int>(bya.z * color1B + bya.x * color2B + bya.y * color3B));
 
 	return finalA | finalR | finalG | finalB;
 }
@@ -118,13 +121,12 @@ float ImplicitLineEquation(Vector2 _test, Vector2 _start, Vector2 _end) {
 Vector4 FindBarycentric(Vertex pointA, Vertex pointB, Vertex pointC, Vector2 curr) {
 	float beta	= ImplicitLineEquation(pointB, pointA, pointC);
 	float gamma = ImplicitLineEquation(pointC, pointB, pointA);
-	float alpha = ImplicitLineEquation(pointA, pointC, pointB);
 
 
-	float b		= ImplicitLineEquation(curr, pointA, pointC);
-	float y		= ImplicitLineEquation(curr, pointB, pointA);
-	float a		= ImplicitLineEquation(curr, pointC, pointB);
-	return Vector4(b/beta, y/gamma, a/alpha, 0);
+	float b		= ImplicitLineEquation(curr, pointA, pointC) / beta;
+	float y		= ImplicitLineEquation(curr, pointB, pointA) / gamma;
+	float a = 1 - b - y;
+	return Vector4(b, y, a, 0);
 }
 
 Vector3 VectorMULTMatrix(Vector3 vect, Matrix3x3 matrix) {

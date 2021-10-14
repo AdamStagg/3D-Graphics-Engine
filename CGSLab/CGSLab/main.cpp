@@ -36,11 +36,12 @@ int main() {
 
 		ClearColor(Raster, RasterPixelCount, 0xFF000000);
 		
- 		FillTriangle(trianglePoints[0], trianglePoints[1], trianglePoints[2]);
+ 		FillTriangle(trianglePoints[0], trianglePoints[1], trianglePoints[2]); //510 fps
 
-		Bresenham(Raster, RasterWidth, trianglePoints[0], trianglePoints[1], 0xFFFFFFFF);
-		Bresenham(Raster, RasterWidth, trianglePoints[1], trianglePoints[2], 0xFFFFFFFF);
-		Bresenham(Raster, RasterWidth, trianglePoints[2], trianglePoints[0], 0xFFFFFFFF);
+		//Bresenham(Raster, RasterWidth, trianglePoints[0], trianglePoints[1], 0xFFFFFFFF);
+		//Bresenham(Raster, RasterWidth, trianglePoints[1], trianglePoints[2], 0xFFFFFFFF);
+		//Bresenham(Raster, RasterWidth, trianglePoints[2], trianglePoints[0], 0xFFFFFFFF);
+
 
 
 	}

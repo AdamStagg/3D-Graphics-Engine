@@ -311,21 +311,24 @@ void FillTriangle(const Vertex& p1, const Vertex& p2, const Vertex& p3) {
 	Vertex screen_p3 = NDCtoScreen(copy_p3);
 
 
-	float startX =	std::min(std::min(screen_p1.x, screen_p2.x), screen_p3.x);
-	float startY =	std::min(std::min(screen_p1.y, screen_p2.y), screen_p3.y);
-	float endX =	std::max(std::max(screen_p1.x, screen_p2.x), screen_p3.x);
-	float endY =	std::max(std::max(screen_p1.y, screen_p2.y), screen_p3.y);
+	int startX =	std::min(std::min(screen_p1.x, screen_p2.x), screen_p3.x);
+	int startY =	std::min(std::min(screen_p1.y, screen_p2.y), screen_p3.y);
+	int endX =		std::max(std::max(screen_p1.x, screen_p2.x), screen_p3.x);
+	int endY =		std::max(std::max(screen_p1.y, screen_p2.y), screen_p3.y);
 
-	for (float x = startX; x < endX; x++)
+	for (int x = startX; x < endX; x++)
 	{
-		for (float y = startY; y < endY; y++)
+		for (int y = startY; y < endY; y++)
 		{
 			Vector4 bya = FindBarycentric(screen_p1, screen_p2, screen_p3, Vector2(x, y));
 			if (bya.x >= 0 && bya.x <= 1 &&
 				bya.y >= 0 && bya.y <= 1 &&
 				bya.z >= 0 && bya.z <= 1)
 			{
-				A_PIXEL berpedColor = colorBerp(bya, screen_p1.color, screen_p2.color, screen_p3.color);
+				//A_PIXEL berpedColor = colorBerp(bya, screen_p1.color, screen_p2.color, screen_p3.color);
+				A_PIXEL berpedColor;
+				berpedColor = colorLerp(screen_p2.color, screen_p1.color, bya.z);
+				berpedColor = colorLerp(berpedColor, screen_p3.color, bya.y);
 
 				if (PixelShader) {
 					PixelShader(berpedColor);
