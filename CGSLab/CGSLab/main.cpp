@@ -8,6 +8,8 @@ int main() {
 		BuildXRotationMatrix(DegToRad(-18))
 	);
 
+	bool temp = true;
+
 	//Clear buffers
 	ClearColor(0);
 	ClearDepth();
@@ -31,14 +33,14 @@ int main() {
 		SV_WorldMatrix = Identity4x4;
 
 			//DRAW GRID
-		DrawGrid();
+		if (temp) DrawGrid();
 
 
 		//APPLY CUBE SHADER
-		PixelShader = PS_Bilinear;
+		PixelShader = temp? PS_Bilinear : PS_Nearest;
 
 		//APPLY SHADER VARIABLES
-		SV_WorldMatrix = MatrixMULTMatrix(BuildYRotationMatrix(static_cast<float>(timer.TotalTime())), Matrix4x4({ 1, 0, 0, 0 }, { 0, 1, 0, 0 }, { 0, 0, 1, 0 }, { 0, .25, 0, 1 }));
+		//SV_WorldMatrix = MatrixMULTMatrix(BuildYRotationMatrix(static_cast<float>(timer.TotalTime())), Matrix4x4({ 1, 0, 0, 0 }, { 0, 1, 0, 0 }, { 0, 0, 1, 0 }, { 0, .25, 0, 1 }));
 		SV_TextureArray =		celestial_pixels;
 		SV_TextureArrayHeight = celestial_height;
 		SV_TextureArrayWidth =	celestial_width;
@@ -55,9 +57,9 @@ int main() {
 		SV_TextureArrayWidth =	celestial_width;
 
 		SV_WorldMatrix = Matrix4x4({ .2f, 0, 0, 0 }, { 0, .2f, 0, 0 }, { 0, 0, .2f, 0 }, { .5f, -.8f, 0, 1 });
-		SV_WorldMatrix = MatrixMULTMatrix(BuildYRotationMatrix(-static_cast<float>(-timer.TotalTime())), SV_WorldMatrix);
+		/*SV_WorldMatrix = MatrixMULTMatrix(BuildYRotationMatrix(-static_cast<float>(-timer.TotalTime())), SV_WorldMatrix);
 		SV_WorldMatrix = MatrixMULTMatrix(BuildXRotationMatrix(static_cast<float>(-timer.TotalTime()) * 2), SV_WorldMatrix);
-		SV_WorldMatrix = MatrixMULTMatrix(SV_WorldMatrix, cubeViewMatrix);
+		SV_WorldMatrix = MatrixMULTMatrix(SV_WorldMatrix, cubeViewMatrix);*/
 
 		//Draw orbiting cube
 		//DrawCube();
@@ -78,7 +80,8 @@ int main() {
 			camera = MatrixMULTMatrix(camera, BuildTranslationMatrix(0, 0.02, 0));
 		}
 		if (GetAsyncKeyState('A') & 0x1) {
-			camera = MatrixMULTMatrix(camera, BuildTranslationMatrix(0.02, 0, 0));
+			//camera = MatrixMULTMatrix(camera, BuildTranslationMatrix(0.02, 0, 0));
+			temp = !temp;
 		}
 		if (GetAsyncKeyState('D') & 0x1) {
 			camera = MatrixMULTMatrix(camera, BuildTranslationMatrix(-0.02, 0, 0));

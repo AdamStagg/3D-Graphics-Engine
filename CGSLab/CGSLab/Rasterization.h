@@ -60,7 +60,7 @@ void Bresenham(const Vertex& _startPos, const Vertex& _endPos, const unsigned in
 
 			A_PIXEL copyColor = _color;
 			if (PixelShader) {
-				PixelShader(copyColor, 0, 0);
+				PixelShader(copyColor, 0, 0, 0);
 			}
 			PlotPixel(Vertex(static_cast<float>(curr_x), static_cast<float>(curr_y), curr_z, 1, 0, 0, 0), copyColor);
 		}
@@ -277,7 +277,7 @@ void FillTriangle(const Vertex& p1, const Vertex& p2, const Vertex& p3) {
 				//float w = berpf(bya, p1.w, p2.w, p3.w);
 				//unsigned int berpColor = colorBerp(bya, screen_p1.color, screen_p2.color, screen_p3.color);
 				if (PixelShader) {
-					PixelShader(barycentric.color, u/w, v/w);
+					PixelShader(barycentric.color, u/w, v/w, barycentric.w);
 				}
 
 				PlotPixel(Vertex(x, y, barycentric.z, 0, u / w, v/w, 0), barycentric.color);

@@ -119,7 +119,7 @@ Vertex berp(Vertex ratios, Vertex p1, Vertex p2, Vertex p3) {
 		ratios.x * p1.x + ratios.y * p2.x + ratios.z * p3.x,
 		ratios.x * p1.y + ratios.y * p2.y + ratios.z * p3.y,
 		ratios.x * p1.z + ratios.y * p2.z + ratios.z * p3.z,
-		0,
+		ratios.x * p1.w + ratios.y * p2.w + ratios.z * p3.w,
 		0,
 		0,
 		colorBerp(ratios, p1.color, p2.color, p3.color)
