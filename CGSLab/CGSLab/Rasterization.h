@@ -33,6 +33,10 @@ void ClearDepth(float depth = 1.0f) {
 	}
 }
 
+int ClipLine(Vertex& v1, Vertex& v2) {
+	return 0;
+}
+
 void Bresenham(const Vertex& _startPos, const Vertex& _endPos, const unsigned int _color) {
 
 	Vertex copy_start = _startPos;
@@ -187,53 +191,89 @@ void MidPoint(const Vector2 _startPos, const Vector2 _endPos, const unsigned int
 	}
 }
 
-void Parametric(const Vector2 _start, const Vector2 _end, const unsigned int _color1, const unsigned int _color2) {
+void Parametric(const Vertex& _start, const Vertex& _end, const unsigned int _color1, const unsigned int _color2 = 0) {
 
-	float currX = _start.x;
-	float currY = _start.y;
-	int curr, start, end;
 
-	float deltaX = _end.x - _start.x;
-	float deltaY = _end.y - _start.y;
+	Vertex copy_start = _start;
+	Vertex copy_end = _end;
 
-	int toggle = 1;
-
-	int startX = static_cast<int>(_start.x), endX = static_cast<int>(_end.x), startY = static_cast<int>(_start.y), endY = static_cast<int>(_end.y);
-	float start2, end2;
-	int inc = 1;
-
-	float slopeX = deltaY / static_cast<float>(deltaX);
-	float slopeY = deltaX / static_cast<float>(deltaY);
-
-	bool isXDominant = abs(slopeX) < 1; //octant 1, 3, 4, 8 if true
-	bool isDown = deltaY > 0;
-
-	if (deltaX < 0 && isXDominant) {
-		toggle = -1;
-	}
-	if (deltaY < 0 && !isXDominant) {
-		toggle = -1;
+	if (VertexShader) {
+		VertexShader(copy_start);
+		VertexShader(copy_end);
 	}
 
-	if (isXDominant) {
-		start = startX;
-		end = endX;
-		start2 = static_cast<float>(startY);
-		end2 = static_cast<float>(endY);
-	}
-	else {
-		start = startY;
-		end = endY;
-		start2 = static_cast<float>(startX);
-		end2 = static_cast<float>(endX);
-	}
+	int clipResult = ClipLine(copy_start, copy_end);
 
-	for (curr = start; toggle * curr <= toggle * end; curr += toggle)
+	PerspectiveDivide(copy_start);
+	PerspectiveDivide(copy_end);
+	Vertex screen_start = NDCtoScreen(copy_start);
+	Vertex screen_end = NDCtoScreen(copy_end);
+
+
+	int dx = (screen_end.x - screen_start.x);
+	int dy = (screen_end.y - screen_start.y);
+	unsigned int total = (std::abs(dx) > std::abs(dy)) ? std::abs(dx) : std::abs(dy);
+	for (size_t i = 0; i < total; i++)
 	{
-		float ratio = (curr - start) / static_cast<float>(end - start);
-		isXDominant ? currY = lerp(static_cast<int>(start2), static_cast<int>(end2), ratio) : currX = lerp(static_cast<int>(start2), static_cast<int>(end2), ratio);
-		PlotPixel(Vertex(static_cast<float>(isXDominant ? curr : floor(currX + 0.5)), static_cast<float>(isXDominant ? floor(currY + 0.5f) : curr), 0, 0, 0, 0, 0), colorLerp(_color1, _color2, ratio));
+		float ratio = static_cast<float>(i) / total;
+		unsigned int curr_x = lerp(screen_start.x, screen_end.x, ratio);
+		unsigned int curr_y = lerp(screen_start.y, screen_end.y, ratio);
+		float curr_z = lerpf(screen_start.z, screen_end.z, ratio);
+
+		A_PIXEL copyColor = _color1;
+		if (PixelShader) {
+			PixelShader(copyColor, 0, 0, 0);
+		}
+		PlotPixel(Vertex(static_cast<float>(curr_x), static_cast<float>(curr_y), curr_z, 1, 0, 0, 0), copyColor);
 	}
+
+	//float currX = screen_start.x;
+	//float currY = screen_start.y;
+	//int curr, start, end;
+
+	//float deltaX = screen_end.x - screen_start.x;
+	//float deltaY = screen_end.y - screen_start.y;
+
+	//int toggle = 1;
+
+	//int startX = static_cast<int>(screen_start.x), endX = static_cast<int>(screen_end.x), startY = static_cast<int>(screen_start.y), endY = static_cast<int>(screen_end.y);
+	//float start2, end2;
+	//int inc = 1;
+
+	//float slopeX = deltaY / static_cast<float>(deltaX);
+	//float slopeY = deltaX / static_cast<float>(deltaY);
+
+	//bool isXDominant = abs(slopeX) < 1; //octant 1, 3, 4, 8 if true
+	//bool isDown = deltaY > 0;
+
+	//if (deltaX < 0 && isXDominant) {
+	//	toggle = -1;
+	//}
+	//if (deltaY < 0 && !isXDominant) {
+	//	toggle = -1;
+	//}
+
+	//if (isXDominant) {
+	//	start = startX;
+	//	end = endX;
+	//	start2 = static_cast<float>(startY);
+	//	end2 = static_cast<float>(endY);
+	//}
+	//else {
+	//	start = startY;
+	//	end = endY;
+	//	start2 = static_cast<float>(startX);
+	//	end2 = static_cast<float>(endX);
+	//}
+
+	//for (curr = start; toggle * curr <= toggle * end; curr += toggle)
+	//{
+	//	float ratio = (curr - start) / static_cast<float>(end - start);
+	//	//float z = lerpf()
+	//	float currZ = lerpf(screen_start.z, screen_end.z, ratio);
+	//	isXDominant ? currY = lerp(static_cast<int>(start2), static_cast<int>(end2), ratio) : currX = lerp(static_cast<int>(start2), static_cast<int>(end2), ratio);
+	//	PlotPixel(Vertex(static_cast<float>(isXDominant ? curr : floor(currX + 0.5)), static_cast<float>(isXDominant ? floor(currY + 0.5f) : curr), currZ, 0, 0, 0, 0), _color2 != 0 ? colorLerp(_color1, _color2, ratio) : _color1);
+	//}
 }
 
 void FillTriangle(const Vertex& p1, const Vertex& p2, const Vertex& p3) {
@@ -247,6 +287,10 @@ void FillTriangle(const Vertex& p1, const Vertex& p2, const Vertex& p3) {
 		VertexShader(copy_p2);
 		VertexShader(copy_p3);
 	}
+
+	PerspectiveDivide(copy_p1);
+	PerspectiveDivide(copy_p2);
+	PerspectiveDivide(copy_p3);
 
 	Vertex screen_p1 = NDCtoScreen(copy_p1);
 	Vertex screen_p2 = NDCtoScreen(copy_p2);
@@ -292,8 +336,8 @@ void FillTriangle(const Vertex& p1, const Vertex& p2, const Vertex& p3) {
 void DrawGrid() {
 	for (size_t i = 0; i < 11; i++)
 	{
-		Bresenham(gridPoints[i], gridPoints[i + 11], gridPoints[0].color);
-		Bresenham(gridPoints[i + 22], gridPoints[i + 33], gridPoints[0].color);
+		Parametric(gridPoints[i], gridPoints[i + 11], gridPoints[0].color);
+		Parametric(gridPoints[i + 22], gridPoints[i + 33], gridPoints[0].color);
 	}
 }
 

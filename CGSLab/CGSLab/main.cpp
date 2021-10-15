@@ -37,7 +37,7 @@ int main() {
 
 
 		//APPLY CUBE SHADER
-		PixelShader = temp? PS_Bilinear : PS_Nearest;
+		PixelShader = temp? PS_Bilinear : PS_Trilinear;
 
 		//APPLY SHADER VARIABLES
 		SV_WorldMatrix = MatrixMULTMatrix(BuildYRotationMatrix(static_cast<float>(timer.TotalTime())), Matrix4x4({ 1, 0, 0, 0 }, { 0, 1, 0, 0 }, { 0, 0, 1, 0 }, { 0, .25, 0, 1 }));
@@ -73,24 +73,28 @@ int main() {
 		}
 		
 		//CAMERA MOVEMENT
-		if (GetAsyncKeyState('W') & 0x1) {
-			camera = MatrixMULTMatrix(camera, BuildTranslationMatrix(0, -0.02, 0));
-		}
-		if (GetAsyncKeyState('S') & 0x1) {
+		if (GetAsyncKeyState('W')) {
 			camera = MatrixMULTMatrix(camera, BuildTranslationMatrix(0, 0.02, 0));
 		}
-		if (GetAsyncKeyState('A') & 0x1) {
-			//camera = MatrixMULTMatrix(camera, BuildTranslationMatrix(0.02, 0, 0));
-			temp = !temp;
+		if (GetAsyncKeyState('S')) {
+			camera = MatrixMULTMatrix(camera, BuildTranslationMatrix(0, -0.02, 0));
 		}
-		if (GetAsyncKeyState('D') & 0x1) {
+		if (GetAsyncKeyState('A')) {
 			camera = MatrixMULTMatrix(camera, BuildTranslationMatrix(-0.02, 0, 0));
+			//temp = !temp;
 		}
-		if (GetAsyncKeyState('Q') & 0x1) {
+		if (GetAsyncKeyState('D')) {
+			camera = MatrixMULTMatrix(camera, BuildTranslationMatrix(0.02, 0, 0));
+		}
+		if (GetAsyncKeyState('Q')) {
 			camera = MatrixMULTMatrix(camera, BuildTranslationMatrix(0, 0, -.02));
 		}
-		if (GetAsyncKeyState('E') & 0x1) {
+		if (GetAsyncKeyState('E')) {
 			camera = MatrixMULTMatrix(camera, BuildTranslationMatrix(0, 0, .02));
+		}
+
+		if (GetAsyncKeyState('T')) {
+			temp = !temp;
 		}
 	};
 

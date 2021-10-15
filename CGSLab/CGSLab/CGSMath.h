@@ -361,3 +361,9 @@ Matrix4x4 BuildScaleMatrix(float xScale, float yScale, float zScale) {
 		{ 0, 0, 0, 1 }
 	);
 }
+
+void PerspectiveDivide(Vertex& v) {
+	v.x /= v.w;
+	v.y /= v.w;
+	v.z /= v.w;
+}
