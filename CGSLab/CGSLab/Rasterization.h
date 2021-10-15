@@ -258,9 +258,9 @@ void FillTriangle(const Vertex& p1, const Vertex& p2, const Vertex& p3) {
 	int endX = max(max(screen_p1.x, screen_p2.x), screen_p3.x);
 	int endY = max(max(screen_p1.y, screen_p2.y), screen_p3.y);
 
-	for (float x = startX; x <= endX; x++)
+	for (int x = startX; x <= endX; x++)
 	{
-		for (float y = startY; y <= endY; y++)
+		for (int y = startY; y <= endY; y++)
 		{
 			Vertex bya = FindBarycentric(screen_p1, screen_p2, screen_p3, Vector2(x, y));
 			if (bya.x >= 0 && bya.x <= 1 &&
@@ -273,14 +273,16 @@ void FillTriangle(const Vertex& p1, const Vertex& p2, const Vertex& p3) {
 				float z = berp(bya, screen_p1.z, screen_p2.z, screen_p3.z);
 				float u = berp(bya, screen_p1.u / screen_p1.w, screen_p2.u / screen_p2.w, screen_p3.u / screen_p3.w);
 				float v = berp(bya, screen_p1.v / screen_p1.w, screen_p2.v / screen_p2.w, screen_p3.v / screen_p3.w);
-				float w = berp(bya, 1 / screen_p1.w, 1 / screen_p2.w, 1 / screen_p3.w);
+				//float u = berp(bya, screen_p1.u, screen_p2.u, screen_p3.u);
+				//float v = berp(bya, screen_p1.v, screen_p2.v, screen_p3.v);
+				float RecipW = berp(bya, 1 / screen_p1.w, 1 / screen_p2.w, 1 / screen_p3.w);
 				//float w = berpf(bya, p1.w, p2.w, p3.w);
 				//unsigned int berpColor = colorBerp(bya, screen_p1.color, screen_p2.color, screen_p3.color);
 				if (PixelShader) {
-					PixelShader(barycentric.color, u/w, v/w, barycentric.w);
+					PixelShader(barycentric.color, u/RecipW, v/RecipW, barycentric.w);
 				}
 
-				PlotPixel(Vertex(x, y, barycentric.z, 0, u / w, v/w, 0), barycentric.color);
+				PlotPixel(Vertex(x, y, barycentric.z, 0, 0, 0, 0), barycentric.color);
 			}
 		}
 	}

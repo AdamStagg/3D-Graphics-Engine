@@ -40,7 +40,7 @@ int main() {
 		PixelShader = temp? PS_Bilinear : PS_Nearest;
 
 		//APPLY SHADER VARIABLES
-		//SV_WorldMatrix = MatrixMULTMatrix(BuildYRotationMatrix(static_cast<float>(timer.TotalTime())), Matrix4x4({ 1, 0, 0, 0 }, { 0, 1, 0, 0 }, { 0, 0, 1, 0 }, { 0, .25, 0, 1 }));
+		SV_WorldMatrix = MatrixMULTMatrix(BuildYRotationMatrix(static_cast<float>(timer.TotalTime())), Matrix4x4({ 1, 0, 0, 0 }, { 0, 1, 0, 0 }, { 0, 0, 1, 0 }, { 0, .25, 0, 1 }));
 		SV_TextureArray =		celestial_pixels;
 		SV_TextureArrayHeight = celestial_height;
 		SV_TextureArrayWidth =	celestial_width;
