@@ -58,7 +58,7 @@ unsigned int colorLerp(unsigned int _color, unsigned int _ogcolor) {
 	unsigned int alpha = _color & 0xFF000000;
 	alpha = alpha >> 24;
 
-	if (alpha / 255.0f == 1) {
+	if (alpha == 0x000000FF) {
 		return _color;
 	}
 	else if (alpha == 0) {
@@ -72,13 +72,16 @@ unsigned int colorLerp(unsigned int _color, unsigned int _ogcolor) {
 	unsigned int oggreen = (_ogcolor & 0x0000FF00) >> 8;
 	unsigned int ogblue  = (_ogcolor & 0x000000FF);
 
+	int deltaR = ((_color & 0x00FF0000) >> 16) - static_cast<int>(ogred);
+	int deltaG = ((_color & 0x0000FF00) >> 8) - static_cast<int>(oggreen);
+	int deltaB = static_cast<int>(_color & 0x000000FF) - static_cast<int>(ogblue);
+	int deltaA = static_cast<int>(alpha) - static_cast<int>(ogalpha);
+
 	//lerp blend
-	unsigned int blendedred =	static_cast<unsigned int>(((static_cast<int>((_color & 0x00FF0000) >> 16)	- static_cast<int>(ogred))		* (alpha / 255.0f) + ogred));
-	unsigned int blendedgreen = static_cast<unsigned int>(((static_cast<int>((_color & 0x0000FF00) >> 8) - static_cast<int>(oggreen))	* (alpha / 255.0f) + oggreen));
-	unsigned int blendedblue =	static_cast<unsigned int>(((static_cast<int>(_color & 0x000000FF)	- static_cast<int>(ogblue))		* (alpha / 255.0f) + ogblue));
-	unsigned int blendedalpha = static_cast<unsigned int>(((static_cast<int>(alpha) - static_cast<int>(ogalpha))	* (alpha / 255.0f) + ogalpha));
-
-
+	unsigned int blendedred =	static_cast<unsigned int>(((deltaR * alpha) >> 8) + ogred);
+	unsigned int blendedgreen = static_cast<unsigned int>(((deltaG * alpha) >> 8) + oggreen);
+	unsigned int blendedblue =	static_cast<unsigned int>(((deltaB * alpha) >> 8) + ogblue);
+	unsigned int blendedalpha = static_cast<unsigned int>(((deltaA * alpha) >> 8) + ogalpha);
 
 	//return the result
 	return blendedalpha << 24 | blendedred << 16 | blendedgreen << 8 | blendedblue;

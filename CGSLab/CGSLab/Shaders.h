@@ -38,3 +38,20 @@ void PS_Texture(A_PIXEL& color, float u, float v) {
 			(static_cast<int>(v * (SV_TextureArrayHeight)) * SV_TextureArrayWidth)
 	]);
 }
+
+void PS_Bilinear(A_PIXEL& color, float _u, float _v) {
+
+	float u = _u * SV_TextureArrayWidth;
+	float v = _v * SV_TextureArrayHeight;
+
+	int uIndex = static_cast<int>(u);
+	int vIndex = static_cast<int>(v);
+
+	float uRatio = u - uIndex;
+	float vRatio = v - vIndex;
+
+	unsigned int topColor =		colorLerp(		BGRAtoARGB(SV_TextureArray[uIndex + vIndex * SV_TextureArrayWidth]),		BGRAtoARGB(SV_TextureArray[uIndex + 1 + vIndex * SV_TextureArrayWidth]),		uRatio);
+	unsigned int bottomColor =	colorLerp(		BGRAtoARGB(SV_TextureArray[uIndex + (vIndex + 1) * SV_TextureArrayWidth]),	BGRAtoARGB(SV_TextureArray[uIndex + 1 + (vIndex + 1) * SV_TextureArrayWidth]),	uRatio);
+
+	color = colorLerp(topColor, bottomColor, vRatio);
+}

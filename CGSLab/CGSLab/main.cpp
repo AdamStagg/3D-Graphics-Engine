@@ -35,7 +35,7 @@ int main() {
 
 
 		//APPLY CUBE SHADER
-		PixelShader = PS_Texture;
+		PixelShader = PS_Bilinear;
 
 		//APPLY SHADER VARIABLES
 		SV_WorldMatrix = MatrixMULTMatrix(BuildYRotationMatrix(static_cast<float>(timer.TotalTime())), Matrix4x4({ 1, 0, 0, 0 }, { 0, 1, 0, 0 }, { 0, 0, 1, 0 }, { 0, .25, 0, 1 }));
