@@ -44,6 +44,7 @@ struct Vector2 {
 	//operator Vector4() { return Vector4(x, y, 0, 0); }
 };
 
+
 struct Vector3 {
 	union {
 		struct {
@@ -168,7 +169,7 @@ struct Matrix4x4 {
 };
 
 
-float NearPlane = 0.1f;
+float NearPlane = .1f;
 float FarPlane = 10.0f;
 float VerticalFOV = 90.0f;
 float AspectRatio = static_cast<float>(RasterHeight) / static_cast<float>(RasterWidth);
@@ -179,17 +180,17 @@ Matrix4x4 camera;
 XTime timer;
 
 int triangles[]{
-	0, 1, 4, 5, 1, 4, // front face
-	1, 2, 5, 6, 2, 5, // right face
-	2, 3, 6, 7, 3, 6,// back face
-	3, 0, 7, 4, 0, 7, // left face
-	0, 1, 3, 2, 1, 3, // top face
-	4, 5, 7, 6, 5, 7 // bottom face
+	0, 4, 1, 5, 1, 4, // front face
+	1, 5, 2, 6, 2, 5, // right face
+	2, 6, 3, 7, 3, 6,// back face
+	3, 7, 0, 4, 0, 7, // left face
+	0, 3, 1, 2, 1, 3, // top face
+	4, 7, 5, 6, 5, 7 // bottom face
 };
 
 int uvs[]{ //all the triangles are set up the same way so we can just reuse the same uvs
-	0, 1, 1, 1, 0, 0, //triangle 1
-	1, 0, 1, 1, 0, 0//triangle 2
+	0, 1, 0, 0, 1, 1, //triangle 1  //bottomL,  bottomR, topL
+	1, 0, 1, 1, 0, 0//triangle 2	//topR, bottomR, topL
 };
 
 const Vertex gridPoints[] = {

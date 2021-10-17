@@ -39,81 +39,91 @@ void PS_Nearest(A_PIXEL& color, float u, float v, float z = 0) {
 	]);
 }
 
-void PS_Bilinear(A_PIXEL& color, float uRatio, float vRatio, float _z) {
+void PS_Bilinear(A_PIXEL& color, float u, float v, float _z) {
 
 	int mipLevel = ((_z - NearPlane) / (FarPlane - NearPlane)) * celestial_numlevels;
-	if (mipLevel >= 10) return;
-	int offset = celestial_leveloffsets[mipLevel];
+	
+	if (mipLevel >= 10) mipLevel = 9;
 	int modifiedWidth = SV_TextureArrayWidth >> mipLevel;
 	int modifiedHeight = SV_TextureArrayHeight >> mipLevel;
+	int offset = celestial_leveloffsets[mipLevel] - 1 - modifiedWidth;
 
-	float modifiedU = uRatio * modifiedWidth;
-	float modifiedV = vRatio * modifiedHeight;
 
-	int uIndex = static_cast<int>(modifiedU);
-	int vIndex = static_cast<int>(modifiedV);
+	float uPixel = u * modifiedWidth;
+	float vPixel = v * modifiedHeight;
+
+	int uIndex = static_cast<int>(uPixel);
+	int vIndex = static_cast<int>(vPixel);
+
+	float uRatio = (uPixel) - static_cast<float>(uIndex);
+	float vRatio = (vPixel) - static_cast<float>(vIndex);
 
 	unsigned int topColor = colorLerp(
-		BGRAtoARGB(SV_TextureArray[offset + ConvertDimension(modifiedU, modifiedV, modifiedWidth)]),
-		BGRAtoARGB(SV_TextureArray[offset + ConvertDimension(modifiedU + 1, modifiedV, modifiedWidth)]),
+		BGRAtoARGB(SV_TextureArray[offset + ConvertDimension(uIndex, vIndex,		modifiedWidth)]),
+		BGRAtoARGB(SV_TextureArray[offset + ConvertDimension(uIndex + 1, vIndex,	modifiedWidth)]),
 		uRatio);
 	unsigned int bottomColor = colorLerp(
-		BGRAtoARGB(SV_TextureArray[offset + ConvertDimension(modifiedU, modifiedV + 1, modifiedWidth)]),
-		BGRAtoARGB(SV_TextureArray[offset + ConvertDimension(modifiedU + 1, modifiedV + 1, modifiedWidth)]),
-		vRatio);
+		BGRAtoARGB(SV_TextureArray[offset + ConvertDimension(uIndex,  vIndex+ 1,		modifiedWidth)]),
+		BGRAtoARGB(SV_TextureArray[offset + ConvertDimension(uIndex + 1, vIndex + 1, modifiedWidth)]),
+		uRatio);
 
 
 	color = colorLerp(topColor, bottomColor, vRatio);
 }
 
-void PS_Trilinear(A_PIXEL& color, float uRatio, float vRatio, float _z) {
+void PS_Trilinear(A_PIXEL& color, float u, float v, float _z) {
 	float mipLevel = ((_z - NearPlane) / (FarPlane - NearPlane)) * celestial_numlevels;
+	
 	if (mipLevel >= 10) return;
-	int offset = celestial_leveloffsets[static_cast<int>(mipLevel)];
 	int modifiedWidth = SV_TextureArrayWidth >> static_cast<int>(mipLevel);
 	int modifiedHeight = SV_TextureArrayHeight >> static_cast<int>(mipLevel);
+	int offset = celestial_leveloffsets[static_cast<int>(mipLevel)] - 1 - modifiedWidth;
 
-	float modifiedU = uRatio * modifiedWidth;
-	float modifiedV = vRatio * modifiedHeight;
 
-	int uIndex = static_cast<int>(modifiedU);
-	int vIndex = static_cast<int>(modifiedV);
+	int uIndex = static_cast<int>(u * modifiedWidth);
+	int vIndex = static_cast<int>(v * modifiedHeight);
+
+	float uRatio = (u * modifiedWidth) - static_cast<float>(uIndex);
+	float vRatio = (v * modifiedHeight) - static_cast<float>(vIndex);
 
 	unsigned int topColor1 = colorLerp(
-		BGRAtoARGB(SV_TextureArray[offset + ConvertDimension(modifiedU, modifiedV, modifiedWidth)]),
-		BGRAtoARGB(SV_TextureArray[offset + ConvertDimension(modifiedU + 1, modifiedV, modifiedWidth)]),
+		BGRAtoARGB(SV_TextureArray[offset + ConvertDimension(uIndex, vIndex, modifiedWidth)]),
+		BGRAtoARGB(SV_TextureArray[offset + ConvertDimension(uIndex + 1, vIndex, modifiedWidth)]),
 		uRatio);
-	unsigned int bottomColor2 = colorLerp(
-		BGRAtoARGB(SV_TextureArray[offset + ConvertDimension(modifiedU, modifiedV + 1, modifiedWidth)]),
-		BGRAtoARGB(SV_TextureArray[offset + ConvertDimension(modifiedU + 1, modifiedV + 1, modifiedWidth)]),
-		vRatio);
+	unsigned int bottomColor1 = colorLerp(
+		BGRAtoARGB(SV_TextureArray[offset + ConvertDimension(uIndex, vIndex + 1, modifiedWidth)]),
+		BGRAtoARGB(SV_TextureArray[offset + ConvertDimension(uIndex + 1, vIndex + 1, modifiedWidth)]),
+		uRatio);
 
 
-	unsigned int firstMipColor = colorLerp(topColor1, bottomColor2, vRatio);
+
+	unsigned int firstMipColor = colorLerp(topColor1, bottomColor1, vRatio);
 
 	if (mipLevel >= 9) {
 		color = firstMipColor;
 	}
 	else {
 		mipLevel++;
-		offset = celestial_leveloffsets[static_cast<int>(mipLevel)];
 		modifiedWidth = SV_TextureArrayWidth >> static_cast<int>(mipLevel);
 		modifiedHeight = SV_TextureArrayHeight >> static_cast<int>(mipLevel);
+		offset = celestial_leveloffsets[static_cast<int>(mipLevel)] - 1 - modifiedWidth;
 
-		modifiedU = uRatio * modifiedWidth;
-		modifiedV = vRatio * modifiedHeight;
 
-		uIndex = static_cast<int>(modifiedU);
-		vIndex = static_cast<int>(modifiedV);
+		uIndex = static_cast<int>(u * modifiedWidth);
+		vIndex = static_cast<int>(v * modifiedHeight);
+
+		uRatio = (u * modifiedWidth) - static_cast<float>(uIndex);
+		vRatio = (v * modifiedHeight) - static_cast<float>(vIndex);
 
 		unsigned int topColor2 = colorLerp(
-			BGRAtoARGB(SV_TextureArray[offset + ConvertDimension(modifiedU, modifiedV, modifiedWidth)]),
-			BGRAtoARGB(SV_TextureArray[offset + ConvertDimension(modifiedU + 1, modifiedV, modifiedWidth)]),
+			BGRAtoARGB(SV_TextureArray[offset + ConvertDimension(uIndex, vIndex, modifiedWidth)]),
+			BGRAtoARGB(SV_TextureArray[offset + ConvertDimension(uIndex + 1, vIndex, modifiedWidth)]),
 			uRatio);
 		unsigned int bottomColor2 = colorLerp(
-			BGRAtoARGB(SV_TextureArray[offset + ConvertDimension(modifiedU, modifiedV + 1, modifiedWidth)]),
-			BGRAtoARGB(SV_TextureArray[offset + ConvertDimension(modifiedU + 1, modifiedV + 1, modifiedWidth)]),
-			vRatio);
+			BGRAtoARGB(SV_TextureArray[offset + ConvertDimension(uIndex, vIndex + 1, modifiedWidth)]),
+			BGRAtoARGB(SV_TextureArray[offset + ConvertDimension(uIndex + 1, vIndex + 1, modifiedWidth)]),
+			uRatio);
+
 
 		unsigned int secondMipColor = colorLerp(topColor2, bottomColor2, vRatio);
 

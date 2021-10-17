@@ -332,11 +332,13 @@ float RadToDeg(float radians) {
 	return (radians * (180.0f / static_cast<float>(PI)));
 }
 
-Matrix4x4 BuildProjectionMatrix(float FOV, float nearPlane, float farPlane, float aspectRatio) {
+Matrix4x4 BuildProjectionMatrix(int FOV, float nearPlane, float farPlane, float aspectRatio) {
+	
+	float yscale = cot(DegToRad(FOV >> 1));
 	return Matrix4x4
 	(
-		Vector4((cot(DegToRad(FOV/2.0f)))*aspectRatio,	0,					0,												0),
-		Vector4(0,						cot(DegToRad(FOV/2.0f)),			0,												0),
+		Vector4(yscale*aspectRatio,		0,					0,												0),
+		Vector4(0,						yscale,				0,												0),
 		Vector4(0,						0,					(farPlane)/(farPlane-nearPlane),				1),
 		Vector4(0,						0,					(-(farPlane * nearPlane))/(farPlane-nearPlane), 0)
 	);
