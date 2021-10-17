@@ -44,5 +44,11 @@
     <ClInclude Include="XTime.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="0_Helicopter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="4_Castle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

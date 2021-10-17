@@ -3,6 +3,8 @@
 #include "RasterSurface.h"
 #include "XTime.h"
 #include <Windows.h>
+#include "4_Castle.h"
+#include "0_Helicopter.h"
 
 int main() {
 
@@ -88,61 +90,40 @@ int main() {
 	RS_Initialize(RasterWidth, RasterHeight);
 
 
-	while(RS_Update(Raster, RasterPixelCount))
+	while (RS_Update(Raster, RasterPixelCount))
 	{
 		//Initialization
 		timer.Signal();
 		ClearColor(0xFF000000);
 
+		unsigned int heliColor = 0xFFd141ad;
+		unsigned int cstlColor = 0xFF4e79d6;
 
-		//APPLY GRID SHADER
-		VertexShader = VS_PerspectiveCamera;
-		SV_WorldMatrix = Identity4x4;
-		//DRAW GRID
-
-		for (size_t i = 0; i < 11; i++)
+		for (size_t i = 0; i < RasterPixelCount; i++)
 		{
-			Bresenham(gridPoints[i], gridPoints[i + 11], gridPoints[0].color);
-			Bresenham(gridPoints[i + 22], gridPoints[i + 33], gridPoints[0].color);
+			float heliR = (((_0_Helicopter_pixels[i] & 0xFF000000) >> 24));
+			float heliG = (((_0_Helicopter_pixels[i] & 0x00ff0000) >> 16));
+			float heliB = (((_0_Helicopter_pixels[i] & 0x0000ff00) >> 8));
+			float cstlR = (((_4_Castle_pixels[i] & 0xFF000000) >> 24));
+			float cstlG = (((_4_Castle_pixels[i] & 0x00ff0000) >> 16));
+			float cstlB = (((_4_Castle_pixels[i] & 0x0000ff00) >> 8));
+
+			unsigned int heliDepth = heliR + heliG + heliB;
+			unsigned int cstlDepth = cstlR + cstlB + cstlG;
+
+			float heliZ = static_cast<float>(heliDepth) / (3 << 8);
+			float cstlZ = static_cast<float>(cstlDepth) / (3 << 8);
+
+			if (heliZ > cstlZ) {
+				Raster[i] = colorLerp(0x00000000, cstlColor, cstlZ);
+			}
+			else {
+				Raster[i] = colorLerp(0x00000000, heliColor, heliZ);
+			}
 		}
 
 
-		//APPLY CUBE SHADER
-		VertexShader = VS_PerspectiveCamera;
-		Matrix4x4 rotMat = BuildYRotationMatrix(static_cast<float>(timer.TotalTime()));
-		Matrix4x4 tranMat = Matrix4x4({ 1, 0, 0, 0 }, { 0, 1, 0, 0 }, { 0, 0, 1, 0 }, { 0, -.25, 0, 1 });
-		Matrix4x4 cubeMatrix = MatrixMULTMatrix(rotMat, tranMat);
 
-		SV_WorldMatrix = cubeMatrix;
-
-		//SV_WorldMatrix = MatrixMULTMatrix(rotMat, viewMatrix);
-
-		Matrix4x4 cubeViewMatrix = OrthogonalAffineInverse(SV_WorldMatrix);
-		//DRAW CUBE
-		for (size_t i = 0; i < 4; i++)
-		{
-			Bresenham(cubePoints[i], cubePoints[(i + 4)], cubePoints[0].color);
-			Bresenham(cubePoints[i], cubePoints[(i + 1) % 4], cubePoints[0].color);
-			Bresenham(cubePoints[i + 4], cubePoints[4 + (i + 1) % 4], cubePoints[0].color);
-		}
-		Matrix4x4 secondCube = Matrix4x4({ .2f, 0, 0, 0 }, { 0, .2f, 0, 0 }, { 0, 0, .2f, 0 }, { .5f, -.8f, 0, 1 });
-		secondCube = MatrixMULTMatrix(BuildYRotationMatrix(-static_cast<float>(timer.TotalTime())), secondCube);
-		secondCube = MatrixMULTMatrix(BuildXRotationMatrix(static_cast<float>(timer.TotalTime()) * 2), secondCube);
-		secondCube = MatrixMULTMatrix(secondCube, cubeViewMatrix);
-		SV_WorldMatrix = secondCube;
-
-		for (size_t i = 0; i < 4; i++)
-		{
-			Bresenham(cubePoints[i], cubePoints[(i + 4)], 0xFF00FFFF);
-			Bresenham(cubePoints[i], cubePoints[(i + 1) % 4], 0xFF00FFFF);
-			Bresenham(cubePoints[i + 4], cubePoints[4 + (i + 1) % 4], 0xFF00FFFF);
-		}
-		if (GetAsyncKeyState(VK_SPACE) & 0x1) {
-			VerticalFOV += 0.01f;
-		}
-		if (GetAsyncKeyState(VK_RETURN) & 0x1) {
-			VerticalFOV -= 0.01f;
-		}
 	};
 
 	RS_Shutdown();

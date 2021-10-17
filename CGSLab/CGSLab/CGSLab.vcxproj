@@ -144,6 +144,8 @@
     <ClCompile Include="XTime.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="0_Helicopter.h" />
+    <ClInclude Include="4_Castle.h" />
     <ClInclude Include="CGSMath.h" />
     <ClInclude Include="Defines.h" />
     <ClInclude Include="Rasterization.h" />
