@@ -107,7 +107,7 @@ int main() {
 		}
 		if (GetAsyncKeyState('Y') & 0x1) {
 			backFaceCull = !backFaceCull;
-			std::cout << "Back face culling: " << (backFaceCull ? "On" : "Off") << std::endl;
+			//std::cout << "Back face culling: " << (backFaceCull ? "On" : "Off") << std::endl;
 		}
 
 	};

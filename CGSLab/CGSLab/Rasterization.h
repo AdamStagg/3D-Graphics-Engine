@@ -78,56 +78,54 @@ int ClipTriangle(Vertex& v1, Vertex& v2, Vertex& v3, Vertex& v4) {
 	Vertex copy_v2 = v2;
 	Vertex copy_v3 = v3;
 	
-	//make an array of size 2 to hold the vertex of line do this for all 3 lines
-	Vertex AB[2] = { copy_v1, copy_v2 };
-	Vertex BC[2] = { copy_v2, copy_v3 };
-	Vertex CA[2] = { copy_v3, copy_v1 };
+	Vertex ABA = copy_v1;
+	Vertex CAA = copy_v1;
+	Vertex ABB = copy_v2;
+	Vertex BCB = copy_v2;
+	Vertex BCC = copy_v3;
+	Vertex CAC = copy_v3;
 
-
-	//create an array of int for holding the result of the clipLine
-	int clipResults[3] = {
-		ClipLine(AB[0], AB[1]),
-		ClipLine(BC[0], BC[1]),
-		ClipLine(CA[0], CA[1])
-	};
-	//create the 6 cases for drawing the triangle 
-	if (clipResults[0] == -1) {
-		v1 = CA[1];
-		v2 = BC[0];
+	int ABClip = ClipLine(ABA, ABB);
+	int BCClip = ClipLine(BCB, BCC);
+	int CAClip = ClipLine(CAC, CAA);
+	
+	if (ABClip == -1) {
+		v1 = CAA;
+		v2 = BCB;
 		v3 = copy_v3;
 		return 1;
 	}
-	else if (clipResults[0] == 1) {
+	else if (ABClip == 1) {
 		v1 = copy_v1;
 		v2 = copy_v2;
-		v3 = BC[1];
-		v4 = CA[0];
+		v3 = BCC;
+		v4 = CAC;
 		return 2;
 	}
-	else if (clipResults[1] == -1) {
+	else if (BCClip == -1) {
 		v1 = copy_v1;
-		v2 = AB[1];
-		v3 = CA[0];
+		v2 = ABB;
+		v3 = CAC;
 		return 1;
 	}
-	else if (clipResults[1] == 1) {
+	else if (BCClip == 1) {
 		v2 = copy_v2;
 		v3 = copy_v3;
-		v1 = AB[0];
-		v4 = CA[1];
+		v1 = ABA;
+		v4 = CAA;
 		return 2;
 	}
-	else if (clipResults[2] == -1) {
+	else if (CAClip == -1) {
 		v2 = copy_v2;
-		v1 = AB[0];
-		v3 = BC[1];
+		v1 = ABA;
+		v3 = BCC;
 		return 1;
 	}
-	else if (clipResults[2] == 1) {
+	else if (CAClip == 1) {
 		v4 = copy_v3;
 		v1 = copy_v1;
-		v3 = BC[0];
-		v2 = AB[1];
+		v3 = BCB;
+		v2 = ABB;
 
 		return 2;
 	}

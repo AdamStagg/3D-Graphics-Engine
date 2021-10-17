@@ -46,7 +46,7 @@ void PS_Bilinear(A_PIXEL& color, float u, float v, float _z) {
 	if (mipLevel >= 10) mipLevel = 9;
 	int modifiedWidth = SV_TextureArrayWidth >> mipLevel;
 	int modifiedHeight = SV_TextureArrayHeight >> mipLevel;
-	int offset = celestial_leveloffsets[mipLevel] - 1 - modifiedWidth;
+	int offset = celestial_leveloffsets[mipLevel] -1 - modifiedWidth;
 
 
 	float uPixel = u * modifiedWidth;
