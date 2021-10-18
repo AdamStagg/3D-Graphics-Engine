@@ -8,8 +8,8 @@
 
 #define PI 3.14159265358979323846
 
-#define RasterWidth 1024
-#define RasterHeight 720
+#define RasterWidth 256
+#define RasterHeight 256
 #define RasterPixelCount (RasterWidth * RasterHeight)
 
 #define Identity2x2 Matrix2x2({1, 0}, {0, 1})

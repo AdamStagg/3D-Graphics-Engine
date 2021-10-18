@@ -47,5 +47,8 @@
     <ClInclude Include="celestial.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="4_Human.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

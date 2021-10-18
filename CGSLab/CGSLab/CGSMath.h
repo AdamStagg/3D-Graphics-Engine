@@ -369,3 +369,31 @@ void PerspectiveDivide(Vertex& v) {
 	v.y /= v.w;
 	v.z /= v.w;
 }
+
+void ScaleVector(Vector3& v, float scale) {
+	v.x *= scale;
+	v.y *= scale;
+	v.z *= scale;
+}
+
+float VectorDOTVector(Vector3 v1, Vector3 v2) {
+	return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
+}
+
+void NormalizeVector(Vector3& v) {
+	float magnitude = sqrtf(VectorDOTVector(v, v));
+
+	if (magnitude < 0.5f) return;
+
+	if (magnitude) {
+		v.x /= magnitude;
+		v.y /= magnitude;
+		v.z /= magnitude;
+	}
+}
+
+void NegateVector(Vector3& v) {
+	v.x = -v.x;
+	v.y = -v.y;
+	v.z = -v.z;
+}

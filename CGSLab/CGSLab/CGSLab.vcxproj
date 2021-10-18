@@ -144,6 +144,7 @@
     <ClCompile Include="XTime.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="4_Human.h" />
     <ClInclude Include="celestial.h" />
     <ClInclude Include="CGSMath.h" />
     <ClInclude Include="Defines.h" />

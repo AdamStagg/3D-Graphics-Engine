@@ -1,4 +1,5 @@
 #include "Rasterization.h"
+#include "4_Human.h"
 
 int main() {
 
@@ -25,90 +26,55 @@ int main() {
 		timer.Signal();
 		ClearColor(0xFF000000);
 		ClearDepth();
-		VertexShader = VS_PerspectiveCamera;
 
 
-		//APPLY GRID SHADER
-		PixelShader = 0;
+		for (size_t i = 0; i < RasterPixelCount; i++)
+		{
+			unsigned int pixel = _4_Human_pixels[i];
 
-		//SETUP SHADER VARIABLES
-		SV_WorldMatrix = Identity4x4;
+			Vector3 normal = {
+				static_cast<float>(((pixel & 0x0000ff00) >> 8)),
+				static_cast<float>(((pixel & 0x00ff0000) >> 16)),
+				static_cast<float>(((pixel & 0xff000000) >> 24))
+			};
 
-		//DRAW GRID
-		DrawGrid();
+			ScaleVector(normal, 1 / 255.0f);
 
-		//APPLY CUBE SHADER
-		PixelShader = isBilinear? PS_Bilinear: PS_Trilinear;
+			NormalizeVector(normal);
 
-		//APPLY SHADER VARIABLES
-		SV_WorldMatrix = MatrixMULTMatrix(BuildYRotationMatrix(static_cast<float>(timer.TotalTime())), Matrix4x4({ 1, 0, 0, 0 }, { 0, 1, 0, 0 }, { 0, 0, 1, 0 }, { 0, .25, 0, 1 }));
-		SV_TextureArray = celestial_pixels;
-		SV_TextureArrayHeight = celestial_height;
-		SV_TextureArrayWidth = celestial_width;
+			Vector3 lightDir = { -0.577, -0.577, 0.577 };
+			Vector4 lightColor = { 1, 216 / 255.0f,0,121 / 255.0f };
 
-		//DRAW CUBE
-		DrawCube();
+			Vector4 surfaceColor = { 1, 1, 1, 1 };
 
 
+			NegateVector(lightDir);
 
-		//Create cube view matrix for the orbiting cube
-		Matrix4x4 cubeViewMatrix = OrthogonalAffineInverse(SV_WorldMatrix);
+			float lightRatio = VectorDOTVector(lightDir, normal);
 
-		//ORBIT CUBE SHADER VARIABLES
-		SV_TextureArray = celestial_pixels;
-		SV_TextureArrayHeight = celestial_height;
-		SV_TextureArrayWidth = celestial_width;
+			if (lightRatio < 0) lightRatio = 0;
+			if (lightRatio > 1) lightRatio = 1;
+			
+			Vector4 result =
+			{
+				1,
+				lightRatio * lightColor.y * surfaceColor.y,
+				lightRatio * lightColor.z * surfaceColor.z,
+				lightRatio * lightColor.w * surfaceColor.w
+			};
 
-		SV_WorldMatrix = Matrix4x4({ .2f, 0, 0, 0 }, { 0, .2f, 0, 0 }, { 0, 0, .2f, 0 }, { .5f, .7f, 0, 1 });
-		SV_WorldMatrix = MatrixMULTMatrix(BuildYRotationMatrix(-static_cast<float>(-timer.TotalTime())), SV_WorldMatrix);
-		SV_WorldMatrix = MatrixMULTMatrix(BuildXRotationMatrix(static_cast<float>(-timer.TotalTime()) * 2), SV_WorldMatrix);
-		SV_WorldMatrix = MatrixMULTMatrix(SV_WorldMatrix, cubeViewMatrix);
+			unsigned int finalColor =
+			{
+				(255u << 24) |
+				static_cast<unsigned int>(255 * result.y) << 16 |
+				static_cast<unsigned int>(255 * result.z) << 8 |
+				static_cast<unsigned int>(255 * result.w)
 
-		//Draw orbiting cube
-		DrawCube();
-
-		//FOV checks
-		if (GetAsyncKeyState(VK_SPACE)) {
-			VerticalFOV += 45 * timer.Delta();
-		}
-		if (GetAsyncKeyState(VK_RETURN)) {
-			VerticalFOV -= 45 * timer.Delta();
+			};
+			Raster[i] = finalColor;
 		}
 
-		//CAMERA MOVEMENT
-		if (GetAsyncKeyState('W')) {
-			camera = MatrixMULTMatrix(camera, BuildTranslationMatrix(0, 1 * timer.Delta(), 0));
-		}
-		if (GetAsyncKeyState('S')) {
-			camera = MatrixMULTMatrix(camera, BuildTranslationMatrix(0, -1 * timer.Delta(), 0));
-		}
-		if (GetAsyncKeyState('A')) {
-			camera = MatrixMULTMatrix(camera, BuildTranslationMatrix(-1 * timer.Delta(), 0, 0));
-		}
-		if (GetAsyncKeyState('D')) {
-			camera = MatrixMULTMatrix(camera, BuildTranslationMatrix(1 * timer.Delta(), 0, 0));
-		}
-		if (GetAsyncKeyState('Q')) {
-			camera = MatrixMULTMatrix(camera, BuildTranslationMatrix(0, 0, -1 * timer.Delta()));
-		}
-		if (GetAsyncKeyState('E')) {
-			camera = MatrixMULTMatrix(camera, BuildTranslationMatrix(0, 0, 1 * timer.Delta()));
-		}
-		if (GetAsyncKeyState('R')) {
-			VerticalFOV = 90;
-			camera = MatrixMULTMatrix(
-				Matrix4x4({ 1, 0, 0, 0 }, { 0, 1, 0, 0 }, { 0, 0, 1, 0 }, { 0, 0, -1, 1 }),
-				BuildXRotationMatrix(DegToRad(-18))
-			);
-		}
-		if (GetAsyncKeyState('T') & 0x1) {
-			isBilinear = !isBilinear;
-			std::cout << "Mode set to: " << (isBilinear ? "Bilinear" : "Trilinear") << std::endl;
-		}
-		if (GetAsyncKeyState('Y') & 0x1) {
-			backFaceCull = !backFaceCull;
-			//std::cout << "Back face culling: " << (backFaceCull ? "On" : "Off") << std::endl;
-		}
+
 
 	};
 
