@@ -33,6 +33,9 @@ void PS_SetColor(A_PIXEL& color) {
 }
 
 void PS_Texture(A_PIXEL& color, float u, float v) {
+	
+	u = fmodf((u + 1) * 3.0f, 1.0f);
+	v = fmodf((v + 1) * 3.0f, 1.0f);
 	color = BGRAtoARGB(SV_TextureArray[
 			(static_cast<int>(u * (SV_TextureArrayWidth))) +
 			(static_cast<int>(v * (SV_TextureArrayHeight)) * SV_TextureArrayWidth)
