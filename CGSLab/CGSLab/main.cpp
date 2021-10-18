@@ -1,4 +1,5 @@
 #include "Rasterization.h"
+#include "0_cave_bluelarge.h"
 
 int main() {
 
@@ -15,60 +16,35 @@ int main() {
 	//Initialization
 	RS_Initialize(RasterWidth, RasterHeight);
 
+	bool temp = true;
+
 	while(RS_Update(Raster, RasterPixelCount))
 	{	
 		//Initialization
 		timer.Signal();
 		ClearColor(0xFF000000);
 		ClearDepth();
-		VertexShader = VS_PerspectiveCamera;
+		
+		for (size_t i = 0; i < RasterPixelCount; i++)
+		{
+
+			float uRatio = (i % RasterWidth) / static_cast<float>(RasterWidth);
+			float vRatio = (i / RasterWidth) / static_cast<float>(RasterHeight);
+
+			int pixelIndex = ConvertDimension(uRatio * _0_cave_bluelarge_width, vRatio * _0_cave_bluelarge_height, _0_cave_bluelarge_width);
+
+			unsigned int color1 = colorLerp(BGRAtoARGB(_0_cave_bluelarge_pixels[pixelIndex]), BGRAtoARGB(_0_cave_bluelarge_pixels[pixelIndex + 1]), uRatio);
+			unsigned int color2 = colorLerp(BGRAtoARGB(_0_cave_bluelarge_pixels[pixelIndex + _0_cave_bluelarge_height]), BGRAtoARGB(_0_cave_bluelarge_pixels[pixelIndex + 1 + _0_cave_bluelarge_height]), uRatio);
+
+			unsigned finalColor = colorLerp(color1, color2, vRatio);
+			Raster[i] = finalColor;
+		}
+
 		
 
-			//APPLY GRID SHADER
-		PixelShader = 0;
-
-			//SETUP SHADER VARIABLES
-		SV_WorldMatrix = Identity4x4;
-
-			//DRAW GRID
-		DrawGrid();
 
 
-		//APPLY CUBE SHADER
-		PixelShader = PS_Texture;
-
-		//APPLY SHADER VARIABLES
-		SV_WorldMatrix = MatrixMULTMatrix(BuildYRotationMatrix(static_cast<float>(timer.TotalTime())), Matrix4x4({ 1, 0, 0, 0 }, { 0, 1, 0, 0 }, { 0, 0, 1, 0 }, { 0, -.25, 0, 1 }));
-		SV_TextureArray =		celestial_pixels;
-		SV_TextureArrayHeight = celestial_height;
-		SV_TextureArrayWidth =	celestial_width;
-
-		//DRAW CUBE
-		DrawCube();
-
-		//Create cube view matrix for the orbiting cube
-		Matrix4x4 cubeViewMatrix = OrthogonalAffineInverse(SV_WorldMatrix);
-
-		//ORBIT CUBE SHADER VARIABLES
-		SV_TextureArray =		celestial_pixels;
-		SV_TextureArrayHeight = celestial_height;
-		SV_TextureArrayWidth =	celestial_width;
-
-		SV_WorldMatrix = Matrix4x4({ .2f, 0, 0, 0 }, { 0, .2f, 0, 0 }, { 0, 0, .2f, 0 }, { .5f, -.8f, 0, 1 });
-		SV_WorldMatrix = MatrixMULTMatrix(BuildYRotationMatrix(-static_cast<float>(-timer.TotalTime())), SV_WorldMatrix);
-		SV_WorldMatrix = MatrixMULTMatrix(BuildXRotationMatrix(static_cast<float>(-timer.TotalTime()) * 2), SV_WorldMatrix);
-		SV_WorldMatrix = MatrixMULTMatrix(SV_WorldMatrix, cubeViewMatrix);
-
-		//Draw orbiting cube
-		DrawCube();
-
-		//FOV checks
-		if (GetAsyncKeyState(VK_SPACE) & 0x1) {
-			VerticalFOV += 0.01f;
-		}
-		if (GetAsyncKeyState(VK_RETURN) & 0x1) {
-			VerticalFOV -= 0.01f;
-		}
+		
 	};
 
 	//Close the program

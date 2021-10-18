@@ -47,5 +47,8 @@
     <ClInclude Include="celestial.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="0_cave_bluelarge.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
