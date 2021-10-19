@@ -7,9 +7,9 @@ int main() {
 
 	const Vertex trianglePoints[3]
 	{
-		Vertex(.5, .5, 0, 0, 0xFFFF0000),
-		Vertex(-.5, .5, 0, 0, 0xFF00FF00),
-		Vertex(0 , -.5, 0, 0, 0xFF0000FF)
+		Vertex( .5f,	.5f, 0, 0, 0xFFFF0000),
+		Vertex(-.5f,	.5f, 0, 0, 0xFF00FF00),
+		Vertex(0 ,	   -.5f, 0, 0, 0xFF0000FF)
 	};
 
 	//const Vertex trianglePoints[3]
@@ -36,6 +36,10 @@ int main() {
 
 		ClearColor(Raster, RasterPixelCount, 0xFF000000);
 		
+		if (GetAsyncKeyState('T') & 0x1) {
+			num++;
+		}
+
  		FillTriangle(trianglePoints[0], trianglePoints[1], trianglePoints[2]); //510 fps
 
 		//Bresenham(Raster, RasterWidth, trianglePoints[0], trianglePoints[1], 0xFFFFFFFF);

@@ -45,6 +45,37 @@ unsigned int colorLerp(unsigned int _color1, unsigned int _color2, float ratio) 
 	return 0xFF000000 | blendedRed << 16 | blendedGreen << 8 | blendedBlue;
 
 }
+
+//Interpolates two colors based on a given ratio for triangles
+unsigned int colorLerpTriangle(unsigned int _color1, unsigned int _color2, int ratio, int ratio2) {
+
+	unsigned int r1 = (_color1 & 0x00FF0000) >> 16;
+	unsigned int g1 = (_color1 & 0x0000FF00) >> 8;
+	unsigned int b1 = (_color1 & 0x000000FF);
+
+	unsigned int r2 = (_color2 & 0x00FF0000) >> 16;
+	unsigned int g2 = (_color2 & 0x0000FF00) >> 8;
+	unsigned int b2 = (_color2 & 0x000000FF);
+
+	int dR = (static_cast<int>(r2) - static_cast<int>(r1));
+	int dG = (static_cast<int>(g2) - static_cast<int>(g1));
+	int dB = (static_cast<int>(b2) - static_cast<int>(b1));
+
+	int ratioR = (static_cast<int>(dR * ratio));
+	int ratioG = (static_cast<int>(dG * ratio));
+	int ratioB = (static_cast<int>(dB * ratio));
+
+	int ratioR2 = ratioR >> 16;
+	int ratioG2 = ratioG >> 16;
+	int ratioB2 = ratioB >> 16;
+
+	unsigned int blendedRed = static_cast<unsigned int>(	ratioR2 + r1);
+	unsigned int blendedGreen = static_cast<unsigned int>(	ratioG2 + g1);
+	unsigned int blendedBlue = static_cast<unsigned int>(	ratioB2 + b1);
+
+	return 0xFF000000 | blendedRed << 16 | blendedGreen << 8 | blendedBlue;
+
+}
 //Interpolates two colors based on alpha
 unsigned int colorLerp(unsigned int _color, unsigned int _ogcolor) {
 
@@ -119,13 +150,10 @@ float ImplicitLineEquation(Vector2 _test, Vector2 _start, Vector2 _end) {
 }
 //Finds the Barycentric coordinates from 3 given points
 Vector4 FindBarycentric(Vertex pointA, Vertex pointB, Vertex pointC, Vector2 curr) {
-	float beta	= ImplicitLineEquation(pointB, pointA, pointC);
-	float gamma = ImplicitLineEquation(pointC, pointB, pointA);
 
-
-	float b		= ImplicitLineEquation(curr, pointA, pointC) / beta;
-	float y		= ImplicitLineEquation(curr, pointB, pointA) / gamma;
-	float a = 1 - b - y;
+	float b		= ImplicitLineEquation(curr, pointC, pointA);
+	float y		= ImplicitLineEquation(curr, pointA, pointB);
+	float a		= ImplicitLineEquation(curr, pointB, pointC);
 	return Vector4(b, y, a, 0);
 }
 

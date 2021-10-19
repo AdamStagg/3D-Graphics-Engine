@@ -316,19 +316,46 @@ void FillTriangle(const Vertex& p1, const Vertex& p2, const Vertex& p3) {
 	int endX =		std::max(std::max(screen_p1.x, screen_p2.x), screen_p3.x);
 	int endY =		std::max(std::max(screen_p1.y, screen_p2.y), screen_p3.y);
 
+	float alpha = ImplicitLineEquation(screen_p1, screen_p2, screen_p3);
+	float beta = ImplicitLineEquation(screen_p2, screen_p3, screen_p1);
+	float gamma = ImplicitLineEquation(screen_p3, screen_p1, screen_p2);
+
+	Vertex temp;
+	if (alpha < 0) {
+		alpha = -alpha;
+		temp = screen_p2;
+		screen_p2 = screen_p3;
+		screen_p3 = temp;
+	}
+	if (beta < 0) {
+		beta = -beta;
+		temp = screen_p3;
+		screen_p3 = screen_p1;
+		screen_p1 = temp;
+	}	
+	if (gamma < 0) {
+		gamma = -gamma;
+		temp = screen_p1;
+		screen_p1 = screen_p2;
+		screen_p2 = temp;
+	}
+
 	for (int x = startX; x < endX; x++)
 	{
 		for (int y = startY; y < endY; y++)
 		{
 			Vector4 bya = FindBarycentric(screen_p1, screen_p2, screen_p3, Vector2(x, y));
-			if (bya.x >= 0 && bya.x <= 1 &&
-				bya.y >= 0 && bya.y <= 1 &&
-				bya.z >= 0 && bya.z <= 1)
+			if (bya.x >= 0 && bya.x <= beta &&
+				bya.y >= 0 && bya.y <= gamma &&
+				bya.z >= 0 && bya.z <= alpha)
 			{
+				bya.x = static_cast<int>(bya.x);
+				bya.y = static_cast<int>(bya.y);
+				bya.z = static_cast<int>(bya.z);
 				//A_PIXEL berpedColor = colorBerp(bya, screen_p1.color, screen_p2.color, screen_p3.color);
 				A_PIXEL berpedColor;
-				berpedColor = colorLerp(screen_p2.color, screen_p1.color, bya.z);
-				berpedColor = colorLerp(berpedColor, screen_p3.color, bya.y);
+				berpedColor = colorLerpTriangle(screen_p2.color, screen_p1.color, bya.z, alpha);
+				berpedColor = colorLerpTriangle(berpedColor, screen_p3.color, bya.y, gamma);
 
 				if (PixelShader) {
 					PixelShader(berpedColor);

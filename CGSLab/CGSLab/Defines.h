@@ -7,7 +7,7 @@
 
 typedef unsigned int A_PIXEL;
 
-
+int num = 1;
 
 
 unsigned int* Raster = nullptr;
