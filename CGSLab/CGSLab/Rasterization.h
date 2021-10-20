@@ -3,15 +3,22 @@
 #include <math.h>
 
 
-void PlotPixel(const int _rasterIndex, const unsigned int _color) {
-	Raster[_rasterIndex] = _color;
+void PlotPixel(const Vector3 _pos, const unsigned int _color) {
+	if (_pos.x >= 0 && _pos.x < RasterWidth && _pos.y >= 0 && _pos.y < RasterHeight)
+	{
+		int index = ConvertDimension(_pos.x, _pos.y, RasterWidth);
+		if (_pos.z < DepthBuffer[index]) {
+			DepthBuffer[index] = _pos.z;
+			Raster[index] = _color;
+		}
+	}
 }
 
 void PlotPixel(const Vertex _pos, const unsigned int _color) {
 	if (_pos.x >= 0 && _pos.x < RasterWidth && _pos.y >= 0 && _pos.y < RasterHeight)
 	{
 		int index = ConvertDimension(_pos.x, _pos.y, RasterWidth);
-		if (_pos.z < DepthBuffer[index]) {
+		if (_pos.z <= DepthBuffer[index]) {
 			DepthBuffer[index] = _pos.z;
 			Raster[index] = _color;
 		}
@@ -33,16 +40,23 @@ void ClearDepth(float depth = 1.0f) {
 	}
 }
 
+int ClipPoint(Vertex& v) {
+	if (v.z < NearPlane) {
+		return 0;
+	}
+	else return 1;
+}
+
 //0 for don't draw, 1 for draw normal, 2 for special
 int ClipLine(Vertex& v1, Vertex& v2) {
 
 	if (v1.z < NearPlane && v2.z < NearPlane) {
 		//don't draw
-		return -1;
+return -1;
 	}
 	else if (v1.z > NearPlane && v2.z > NearPlane) {
-		//draw normal
-		return 1;
+	//draw normal
+	return 1;
 	}
 	if (v1.z < NearPlane) {
 		float ratio = (NearPlane - v1.z) / ((v2.z - v1.z));
@@ -73,11 +87,11 @@ int ClipTriangle(Vertex& v1, Vertex& v2, Vertex& v3, Vertex& v4) {
 
 	//fully infront of nearplane
 	if (v1.z > NearPlane && v2.z > NearPlane && v3.z > NearPlane) return 0;
-	
+
 	Vertex copy_v1 = v1;
 	Vertex copy_v2 = v2;
 	Vertex copy_v3 = v3;
-	
+
 	Vertex ABA = copy_v1;
 	Vertex CAA = copy_v1;
 	Vertex ABB = copy_v2;
@@ -88,7 +102,7 @@ int ClipTriangle(Vertex& v1, Vertex& v2, Vertex& v3, Vertex& v4) {
 	int ABClip = ClipLine(ABA, ABB);
 	int BCClip = ClipLine(BCB, BCC);
 	int CAClip = ClipLine(CAC, CAA);
-	
+
 	if (ABClip == -1) {
 		v1 = CAA;
 		v2 = BCB;
@@ -130,7 +144,28 @@ int ClipTriangle(Vertex& v1, Vertex& v2, Vertex& v3, Vertex& v4) {
 		return 2;
 	}
 	//return 1 is 1 triangle, return 2 is 2 triangles
-	
+
+	return -5;
+}
+
+void DrawPoint(const Vertex& _pos, const PIXEL& _color) {
+
+	Vertex copy = _pos;
+
+	if (VertexShader) {
+		VertexShader(copy);
+	}
+
+	//if (ClipPoint(copy)) return; //will return if ClipPoint returns 0
+	PerspectiveDivide(copy);
+	Vertex screen = NDCtoScreen(copy);
+
+	PIXEL copyColor = _color;
+
+	Saturate(screen.z);
+
+	PlotPixel(screen, copyColor);
+
 
 }
 
@@ -149,21 +184,21 @@ void Bresenham(const Vertex& _startPos, const Vertex& _endPos, const unsigned in
 
 	if (true)
 	{
-		int dx = (screen_end.x - screen_start.x);
-		int dy = (screen_end.y - screen_start.y);
+		int dx = static_cast<int>((screen_end.x - screen_start.x));
+		int dy = static_cast<int>((screen_end.y - screen_start.y));
 		unsigned int total = (std::abs(dx) > std::abs(dy)) ? std::abs(dx) : std::abs(dy);
 		for (size_t i = 0; i < total; i++)
 		{
 			float ratio = static_cast<float>(i) / total;
-			unsigned int curr_x = lerp(screen_start.x, screen_end.x, ratio);
-			unsigned int curr_y = lerp(screen_start.y, screen_end.y, ratio);
+			unsigned int curr_x = static_cast<unsigned int>(lerpf(screen_start.x, screen_end.x, ratio));
+			unsigned int curr_y = static_cast<unsigned int>(lerpf(screen_start.y, screen_end.y, ratio));
 			float curr_z = lerpf(screen_start.z, screen_end.z, ratio);
 
-			A_PIXEL copyColor = _color;
+			PIXEL copyColor = _color;
 			if (PixelShader) {
 				PixelShader(copyColor, 0, 0, 0);
 			}
-			PlotPixel(Vertex(static_cast<float>(curr_x), static_cast<float>(curr_y), curr_z, 1, 0, 0, 0), copyColor);
+			PlotPixel(Vertex(static_cast<float>(curr_x), static_cast<float>(curr_y), curr_z, 1, 0, 0, 0, {}), copyColor);
 		}
 	}
 
@@ -280,7 +315,7 @@ void MidPoint(const Vector2 _startPos, const Vector2 _endPos, const unsigned int
 
 	for (curr = start; curr <= end; curr++)
 	{
-		PlotPixel(isXDominant ? Vertex(static_cast<float>(curr), static_cast<float>(currY), 0, 0, 0, 0, 0) : Vertex(static_cast<float>(currX), static_cast<float>(curr), 0, 0, 0, 0, 0), _color);
+		PlotPixel(isXDominant ? Vertex(static_cast<float>(curr), static_cast<float>(currY), 0, 0, 0, 0, 0, {}) : Vertex(static_cast<float>(currX), static_cast<float>(curr), 0, 0, 0, 0, 0, {}), _color);
 		Vector4 mid(isXDominant ? curr + xInc : currX + xInc, isXDominant ? currY + yInc : curr + yInc, 0, 0);
 		if (toggle * ((yTogg * static_cast<int>(_endPos.x - _startPos.x)) < 0 ? ImplicitLineEquation(mid, _end, _start) : ImplicitLineEquation(mid, _start, _end)) < 0) {
 			isXDominant ? currY += inc : currX += inc;
@@ -311,21 +346,21 @@ void Parametric(const Vertex& _start, const Vertex& _end, const unsigned int _co
 	Vertex screen_end = NDCtoScreen(copy_end);
 
 
-	int dx = std::abs(screen_end.x - screen_start.x);
-	int dy = std::abs(screen_end.y - screen_start.y);
+	int dx = static_cast<int>(std::abs(screen_end.x - screen_start.x));
+	int dy = static_cast<int>(std::abs(screen_end.y - screen_start.y));
 	unsigned int total = (dx > dy) ? dx : dy;
 	for (size_t i = 0; i < total; i++)
 	{
 		float ratio = static_cast<float>(i) / total;
-		unsigned int curr_x = lerp(screen_start.x, screen_end.x, ratio);
-		unsigned int curr_y = lerp(screen_start.y, screen_end.y, ratio);
+		unsigned int curr_x = static_cast<unsigned int>(lerpf(screen_start.x, screen_end.x, ratio));
+		unsigned int curr_y = static_cast<unsigned int>(lerpf(screen_start.y, screen_end.y, ratio));
 		float curr_z = lerpf(screen_start.z, screen_end.z, ratio);
 
-		A_PIXEL copyColor = _color1;
+		PIXEL copyColor = _color1;
 		if (PixelShader) {
 			PixelShader(copyColor, 0, 0, 0);
 		}
-		PlotPixel(Vertex(static_cast<float>(curr_x), static_cast<float>(curr_y), curr_z, 1, 0, 0, 0), copyColor);
+		PlotPixel(Vertex(static_cast<float>(curr_x), static_cast<float>(curr_y), curr_z, 1, 0, 0, 0, {}), copyColor);
 	}
 
 	//float currX = screen_start.x;
@@ -406,16 +441,16 @@ void tempFillTriangle(const Vertex& p1, const Vertex& p2, const Vertex& p3) {
 	Vertex screen_p3 = NDCtoScreen(copy_p3);
 
 
-	int startX = min(min(screen_p1.x, screen_p2.x), screen_p3.x);
-	int startY = min(min(screen_p1.y, screen_p2.y), screen_p3.y);
-	int endX = max(max(screen_p1.x, screen_p2.x), screen_p3.x);
-	int endY = max(max(screen_p1.y, screen_p2.y), screen_p3.y);
+	int startX = static_cast<int>(min(min(screen_p1.x, screen_p2.x), screen_p3.x));
+	int startY = static_cast<int>(min(min(screen_p1.y, screen_p2.y), screen_p3.y));
+	int endX =   static_cast<int>(max(max(screen_p1.x, screen_p2.x), screen_p3.x));
+	int endY =   static_cast<int>(max(max(screen_p1.y, screen_p2.y), screen_p3.y));
 
 	for (int x = startX; x <= endX; x++)
 	{
 		for (int y = startY; y <= endY; y++)
 		{
-			Vertex bya = FindBarycentric(screen_p1, screen_p2, screen_p3, Vector2(x, y));
+			Vertex bya = FindBarycentric(screen_p1, screen_p2, screen_p3, Vector2(static_cast<float>(x), static_cast<float>(y)));
 			if (bya.x >= 0 && bya.x <= 1 &&
 				bya.y >= 0 && bya.y <= 1 &&
 				bya.z >= 0 && bya.z <= 1)
@@ -435,7 +470,7 @@ void tempFillTriangle(const Vertex& p1, const Vertex& p2, const Vertex& p3) {
 					PixelShader(barycentric.color, u / RecipW, v / RecipW, barycentric.w);
 				}
 
-				PlotPixel(Vertex(x, y, barycentric.z, 0, 0, 0, 0), barycentric.color);
+				PlotPixel(Vertex(static_cast<float>(x), static_cast<float>(y), barycentric.z, 0, 0, 0, 0, {}), barycentric.color);
 			}
 		}
 	}
@@ -448,16 +483,16 @@ void FillTriangle(const Vertex& p1, const Vertex& p2, const Vertex& p3) {
 	Vertex screen_p3 = NDCtoScreen(p3);
 
 
-	int startX = min(min(screen_p1.x, screen_p2.x), screen_p3.x);
-	int startY = min(min(screen_p1.y, screen_p2.y), screen_p3.y);
-	int endX = max(max(screen_p1.x, screen_p2.x), screen_p3.x);
-	int endY = max(max(screen_p1.y, screen_p2.y), screen_p3.y);
+	int startX = static_cast<int>(min(min(screen_p1.x, screen_p2.x), screen_p3.x));
+	int startY = static_cast<int>(min(min(screen_p1.y, screen_p2.y), screen_p3.y));
+	int endX =   static_cast<int>(max(max(screen_p1.x, screen_p2.x), screen_p3.x));
+	int endY =   static_cast<int>(max(max(screen_p1.y, screen_p2.y), screen_p3.y));
 
 	for (int x = startX; x <= endX; x++)
 	{
 		for (int y = startY; y <= endY; y++)
 		{
-			Vertex bya = FindBarycentric(screen_p1, screen_p2, screen_p3, Vector2(x, y));
+			Vertex bya = FindBarycentric(screen_p1, screen_p2, screen_p3, Vector2(static_cast<float>(x), static_cast<float>(y)));
 			if (bya.x >= 0 && bya.x <= 1 &&
 				bya.y >= 0 && bya.y <= 1 &&
 				bya.z >= 0 && bya.z <= 1)
@@ -476,7 +511,7 @@ void FillTriangle(const Vertex& p1, const Vertex& p2, const Vertex& p3) {
 					PixelShader(barycentric.color, u / RecipW, v / RecipW, barycentric.w);
 				}
 
-				PlotPixel(Vertex(x, y, barycentric.z, 0, 0, 0, 0), barycentric.color);
+				PlotPixel(Vertex(static_cast<float>(x), static_cast<float>(y), barycentric.z, 0, 0, 0, 0, {}), barycentric.color);
 			}
 		}
 	}
@@ -547,4 +582,20 @@ void DrawCube() {
 		//Draw Triangle
 		DrawTriangle(cubePoints[triangles[i]], cubePoints[triangles[i + 1]], cubePoints[triangles[i + 2]]);
 	}
+}
+
+Vertex* GenerateStonehengeVertexes() {
+	Vertex* output = new Vertex[StoneHengeVertexCount];
+
+	for (size_t i = 0; i < StoneHengeVertexCount; i++)
+	{
+		StoneHenge_data[i];
+		output[i] = Vertex(
+			StoneHenge_data[i].pos[0], StoneHenge_data[i].pos[1], StoneHenge_data[i].pos[2],
+			StoneHenge_data[i].uvw[2], StoneHenge_data[i].uvw[0], StoneHenge_data[i].uvw[1],
+			0, Vector3(StoneHenge_data[i].nrm[0], StoneHenge_data[i].nrm[1], StoneHenge_data[i].nrm[2])
+			);
+	}
+	return output;
+
 }

@@ -150,6 +150,8 @@
     <ClInclude Include="Rasterization.h" />
     <ClInclude Include="RasterSurface.h" />
     <ClInclude Include="Shaders.h" />
+    <ClInclude Include="StoneHenge.h" />
+    <ClInclude Include="StoneHenge_Texture.h" />
     <ClInclude Include="XTime.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

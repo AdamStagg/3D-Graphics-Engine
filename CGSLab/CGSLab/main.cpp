@@ -11,7 +11,9 @@ int main() {
 	bool isBilinear = true;
 	bool backFaceCull = false;
 
+	unsigned int temp = colorLerp(0x5b7fadff, 0xff4e839c);
 
+	Vertex* stoneHengeVerteces = GenerateStonehengeVertexes();
 	//Clear buffers
 	ClearColor(0);
 	ClearDepth();
@@ -19,96 +21,68 @@ int main() {
 	//Initialization
 	RS_Initialize(RasterWidth, RasterHeight);
 
+	Vertex* starPos = new Vertex[3000];
+	Vertex starPosOrigin = { 1, 1, 1, 1, 0, 0, 0xFFFFFFFF, {} };
+
+	for (size_t i = 0; i < 3000; i++)
+	{
+		starPos[i] = { 
+			50 * (((float)(rand() % 201) / 100.0f) - 1), 
+			50 * (((float)(rand() % 201) / 100.0f) - 1), 
+			50 * (((float)(rand() % 201) / 100.0f) - 1),
+			0, 
+			0, 
+			0, 
+			0xFFFFFFFF, 
+			{} };
+	}
+
 	while (RS_Update(Raster, RasterPixelCount))
 	{
 		//Initialization
 		timer.Signal();
-		ClearColor(0xFF000000);
+		ClearColor(0xFF1010FF);
 		ClearDepth();
 		VertexShader = VS_PerspectiveCamera;
+		SV_ViewMatrix = OrthogonalAffineInverse(camera);
+		SV_ProjectionMatrix = BuildProjectionMatrix(VerticalFOV, NearPlane, FarPlane, AspectRatio);
 
-
-		//APPLY GRID SHADER
-		PixelShader = 0;
-
-		//SETUP SHADER VARIABLES
 		SV_WorldMatrix = Identity4x4;
 
-		//DRAW GRID
-		DrawGrid();
-
-		//APPLY CUBE SHADER
-		PixelShader = isBilinear? PS_Bilinear: PS_Trilinear;
-
-		//APPLY SHADER VARIABLES
-		SV_WorldMatrix = MatrixMULTMatrix(BuildYRotationMatrix(static_cast<float>(timer.TotalTime())), Matrix4x4({ 1, 0, 0, 0 }, { 0, 1, 0, 0 }, { 0, 0, 1, 0 }, { 0, .25, 0, 1 }));
-		SV_TextureArray = celestial_pixels;
-		SV_TextureArrayHeight = celestial_height;
-		SV_TextureArrayWidth = celestial_width;
-
-		//DRAW CUBE
-		DrawCube();
-
-
-
-		//Create cube view matrix for the orbiting cube
-		Matrix4x4 cubeViewMatrix = OrthogonalAffineInverse(SV_WorldMatrix);
-
-		//ORBIT CUBE SHADER VARIABLES
-		SV_TextureArray = celestial_pixels;
-		SV_TextureArrayHeight = celestial_height;
-		SV_TextureArrayWidth = celestial_width;
-
-		SV_WorldMatrix = Matrix4x4({ .2f, 0, 0, 0 }, { 0, .2f, 0, 0 }, { 0, 0, .2f, 0 }, { .5f, .7f, 0, 1 });
-		SV_WorldMatrix = MatrixMULTMatrix(BuildYRotationMatrix(-static_cast<float>(-timer.TotalTime())), SV_WorldMatrix);
-		SV_WorldMatrix = MatrixMULTMatrix(BuildXRotationMatrix(static_cast<float>(-timer.TotalTime()) * 2), SV_WorldMatrix);
-		SV_WorldMatrix = MatrixMULTMatrix(SV_WorldMatrix, cubeViewMatrix);
-
-		//Draw orbiting cube
-		DrawCube();
-
-		//FOV checks
-		if (GetAsyncKeyState(VK_SPACE)) {
-			VerticalFOV += 45 * timer.Delta();
-		}
-		if (GetAsyncKeyState(VK_RETURN)) {
-			VerticalFOV -= 45 * timer.Delta();
+		//Draw star field
+		for (size_t i = 0; i < 3000; i++)
+		{
+			//Draw point
+			DrawPoint(starPos[i], starPos[i].color);
 		}
 
-		//CAMERA MOVEMENT
-		if (GetAsyncKeyState('W')) {
-			camera = MatrixMULTMatrix(camera, BuildTranslationMatrix(0, 1 * timer.Delta(), 0));
+		PixelShader = PS_Bilinear;
+		SV_TextureArray = StoneHenge_pixels;
+		SV_TextureArrayWidth = StoneHenge_width;
+		SV_TextureArrayHeight = StoneHenge_height;
+		SV_WorldMatrix = BuildScaleMatrix(0.1f, 0.1f, 0.1f);
+
+		//Draw the stonehenge model
+		for (size_t i = 0; i < StoneHengeVertexCount; i+=3)
+		{
+			//DrawTriangle(stoneHengeVerteces[i], stoneHengeVerteces[i + 1], stoneHengeVerteces[i + 2]);
 		}
-		if (GetAsyncKeyState('S')) {
-			camera = MatrixMULTMatrix(camera, BuildTranslationMatrix(0, -1 * timer.Delta(), 0));
+
+
+
+		if (GetAsyncKeyState(VK_UP)) {
+			camera = MatrixMULTMatrix(BuildXRotationMatrix(1 * static_cast<float>(timer.Delta())), camera);
 		}
-		if (GetAsyncKeyState('A')) {
-			camera = MatrixMULTMatrix(camera, BuildTranslationMatrix(-1 * timer.Delta(), 0, 0));
+		if (GetAsyncKeyState(VK_DOWN)) {
+			camera = MatrixMULTMatrix(BuildXRotationMatrix(-1 * static_cast<float>(timer.Delta())), camera);
 		}
-		if (GetAsyncKeyState('D')) {
-			camera = MatrixMULTMatrix(camera, BuildTranslationMatrix(1 * timer.Delta(), 0, 0));
+		if (GetAsyncKeyState(VK_RIGHT)) {
+			camera = MatrixMULTMatrix(camera, BuildYRotationMatrix(-1 * static_cast<float>(timer.Delta())));
 		}
-		if (GetAsyncKeyState('Q')) {
-			camera = MatrixMULTMatrix(camera, BuildTranslationMatrix(0, 0, -1 * timer.Delta()));
+		if (GetAsyncKeyState(VK_LEFT)) {
+			camera = MatrixMULTMatrix(camera, BuildYRotationMatrix(1 * static_cast<float>(timer.Delta())));
 		}
-		if (GetAsyncKeyState('E')) {
-			camera = MatrixMULTMatrix(camera, BuildTranslationMatrix(0, 0, 1 * timer.Delta()));
-		}
-		if (GetAsyncKeyState('R')) {
-			VerticalFOV = 90;
-			camera = MatrixMULTMatrix(
-				Matrix4x4({ 1, 0, 0, 0 }, { 0, 1, 0, 0 }, { 0, 0, 1, 0 }, { 0, 0, -1, 1 }),
-				BuildXRotationMatrix(DegToRad(-18))
-			);
-		}
-		if (GetAsyncKeyState('T') & 0x1) {
-			isBilinear = !isBilinear;
-			std::cout << "Mode set to: " << (isBilinear ? "Bilinear" : "Trilinear") << std::endl;
-		}
-		if (GetAsyncKeyState('Y') & 0x1) {
-			backFaceCull = !backFaceCull;
-			//std::cout << "Back face culling: " << (backFaceCull ? "On" : "Off") << std::endl;
-		}
+
 
 	};
 
@@ -116,5 +90,6 @@ int main() {
 	RS_Shutdown();
 	delete[] Raster;
 	delete[] DepthBuffer;
+	delete[] starPos;
 
 }

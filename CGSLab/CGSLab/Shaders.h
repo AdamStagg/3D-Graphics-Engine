@@ -3,9 +3,11 @@
 
 
 void (*VertexShader)(Vertex&) = 0;
-void (*PixelShader)(A_PIXEL&, float, float, float) = 0;
+void (*PixelShader)(PIXEL&, float, float, float) = 0;
 
 Matrix4x4 SV_WorldMatrix;
+Matrix4x4 SV_ViewMatrix;
+Matrix4x4 SV_ProjectionMatrix;
 unsigned int* SV_TextureArray;
 unsigned int SV_TextureArrayWidth = 0;
 unsigned int SV_TextureArrayHeight = 0;
@@ -15,11 +17,9 @@ void VS_World(Vertex& vert) {
 }
 
 void VS_PerspectiveCamera(Vertex& vert) {
-	Matrix4x4 viewMatrix = OrthogonalAffineInverse(camera);
-	Matrix4x4 projectionMatrix = BuildProjectionMatrix(VerticalFOV, NearPlane, FarPlane, AspectRatio);
 
-	Matrix4x4 finalMatrix = MatrixMULTMatrix(SV_WorldMatrix, viewMatrix);
-	finalMatrix = MatrixMULTMatrix(finalMatrix, projectionMatrix);
+	Matrix4x4 finalMatrix = MatrixMULTMatrix(SV_WorldMatrix, SV_ViewMatrix);
+	finalMatrix = MatrixMULTMatrix(finalMatrix, SV_ProjectionMatrix);
 
 	vert.values = VectorMULTMatrix(vert.values, finalMatrix);
 	//vert.x = vert.x / vert.w;
@@ -28,20 +28,20 @@ void VS_PerspectiveCamera(Vertex& vert) {
 	//vert.w = vert.w;
 }
 
-void PS_SetColor(A_PIXEL& color) {
+void PS_SetColor(PIXEL& color) {
 	color = color;
 }
 
-void PS_Nearest(A_PIXEL& color, float u, float v, float z = 0) {
+void PS_Nearest(PIXEL& color, float u, float v, float z = 0) {
 	color = BGRAtoARGB(SV_TextureArray[
 		(static_cast<int>(u * (SV_TextureArrayWidth))) +
 			(static_cast<int>(v * (SV_TextureArrayHeight)) * SV_TextureArrayWidth)
 	]);
 }
 
-void PS_Bilinear(A_PIXEL& color, float u, float v, float _z) {
+void PS_Bilinear(PIXEL& color, float u, float v, float _z) {
 
-	int mipLevel = ((_z - NearPlane) / (FarPlane - NearPlane)) * celestial_numlevels;
+	int mipLevel = static_cast<int>(((_z - NearPlane) / (FarPlane - NearPlane)) * celestial_numlevels);
 	
 	if (mipLevel >= 10) mipLevel = 9;
 	int modifiedWidth = SV_TextureArrayWidth >> mipLevel;
@@ -71,7 +71,7 @@ void PS_Bilinear(A_PIXEL& color, float u, float v, float _z) {
 	color = colorLerp(topColor, bottomColor, vRatio);
 }
 
-void PS_Trilinear(A_PIXEL& color, float u, float v, float _z) {
+void PS_Trilinear(PIXEL& color, float u, float v, float _z) {
 	float mipLevel = ((_z - NearPlane) / (FarPlane - NearPlane)) * celestial_numlevels;
 	
 	if (mipLevel >= 10) return;

@@ -122,7 +122,8 @@ Vertex berp(Vertex ratios, Vertex p1, Vertex p2, Vertex p3) {
 		ratios.x * p1.w + ratios.y * p2.w + ratios.z * p3.w,
 		0,
 		0,
-		colorBerp(ratios, p1.color, p2.color, p3.color)
+		colorBerp(ratios, p1.color, p2.color, p3.color), 
+		{}
 	);
 }
 
@@ -148,7 +149,7 @@ Vertex FindBarycentric(Vertex pointA, Vertex pointB, Vertex pointC, Vector2 curr
 	float b		= ImplicitLineEquation(curr, pointA, pointC);
 	float y		= ImplicitLineEquation(curr, pointB, pointA);
 	float a		= ImplicitLineEquation(curr, pointC, pointB);
-	return Vertex(a/alpha, b/beta, y/gamma, 0, 0, 0, 0);
+	return Vertex(a / alpha, b / beta, y / gamma, 0, 0, 0, 0, {});
 }
 
 Vector3 VectorMULTMatrix(Vector3 vect, Matrix3x3 matrix) {
@@ -177,7 +178,8 @@ Vertex VectorMULTMatrix(Vertex vect, Matrix4x4 matrix) {
 		/*w*/vect.x * matrix.matrix[0].w + vect.y * matrix.matrix[1].w + vect.z * matrix.matrix[2].w + vect.w * matrix.matrix[3].w,
 		vect.u, 
 		vect.v,
-		vect.color
+		vect.color,
+		vect.normal
 	};
 }
 
@@ -190,7 +192,8 @@ Vertex VectorMULTMatrix(Vertex vect, Matrix3x3 matrix) {
 		/*w*/0,
 		vect.u,
 		vect.v,
-		vect.color
+		vect.color,
+		vect.normal
 	);
 }
 Matrix3x3 MatrixMULTMatrix(Matrix3x3 m1, Matrix3x3 m2) {
@@ -230,7 +233,8 @@ Vertex NDCtoScreen(const Vertex& v) {
 		v.w,
 		v.u,
 		v.v,
-		v.color
+		v.color,
+		v.normal
 	);
 }
 
@@ -332,9 +336,9 @@ float RadToDeg(float radians) {
 	return (radians * (180.0f / static_cast<float>(PI)));
 }
 
-Matrix4x4 BuildProjectionMatrix(int FOV, float nearPlane, float farPlane, float aspectRatio) {
+Matrix4x4 BuildProjectionMatrix(float FOV, float nearPlane, float farPlane, float aspectRatio) {
 	
-	float yscale = cot(DegToRad(FOV >> 1));
+	float yscale = cot(DegToRad(FOV /2));
 	return Matrix4x4
 	(
 		Vector4(yscale*aspectRatio,		0,					0,												0),
@@ -368,4 +372,9 @@ void PerspectiveDivide(Vertex& v) {
 	v.x /= v.w;
 	v.y /= v.w;
 	v.z /= v.w;
+}
+
+void Saturate(float& v) {
+	if (v < 0) v = 0;
+	if (v > 1) v = 1;
 }
