@@ -1,5 +1,4 @@
 #include "Rasterization.h"
-#include "main.h"
 
 int main() {
 	//Initialization

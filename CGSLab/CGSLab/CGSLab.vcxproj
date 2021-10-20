@@ -147,7 +147,6 @@
     <ClInclude Include="celestial.h" />
     <ClInclude Include="CGSMath.h" />
     <ClInclude Include="Defines.h" />
-    <ClInclude Include="main.h" />
     <ClInclude Include="Rasterization.h" />
     <ClInclude Include="RasterSurface.h" />
     <ClInclude Include="Shaders.h" />
