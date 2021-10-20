@@ -8,6 +8,7 @@ void (*PixelShader)(PIXEL&, float, float, float) = 0;
 Matrix4x4 SV_WorldMatrix;
 Matrix4x4 SV_ViewMatrix;
 Matrix4x4 SV_ProjectionMatrix;
+Vector3 SV_DirectionalLightPos;
 unsigned int* SV_TextureArray;
 unsigned int SV_TextureArrayWidth = 0;
 unsigned int SV_TextureArrayHeight = 0;
@@ -27,6 +28,19 @@ void VS_PerspectiveCamera(Vertex& vert) {
 	//vert.z = vert.z / vert.w;
 	//vert.w = vert.w;
 }
+//
+//void VS_PerspectiveLighting(Vertex& vert) {
+//	vert.values = VectorMULTMatrix(vert.values, SV_WorldMatrix);
+//	vert.normal = VectorMULTMatrix(Vector4(vert.normal.x, vert.normal.y, vert.normal.z, 1), SV_WorldMatrix);
+//
+//	Vector3 negLightDir = { -SV_DirectionalLightPos.x, -SV_DirectionalLightPos.y, -SV_DirectionalLightPos.z };
+//
+//	float lightRatio = Saturate(VectorDOTVector(negLightDir, vert.normal));
+//
+//	
+//
+//
+//}
 
 void PS_SetColor(PIXEL& color) {
 	color = color;

@@ -21,8 +21,17 @@ int main() {
 	//Initialization
 	RS_Initialize(RasterWidth, RasterHeight);
 
+	//STAR DATA
 	Vertex* starPos = new Vertex[3000];
 	Vertex starPosOrigin = { 1, 1, 1, 1, 0, 0, 0xFFFFFFFF, {} };
+
+
+	//LIGHT DATA
+	Vector3 directionalLightDir = { -0.577f, -0.577f, 0.577f };
+	unsigned int directionalLightColor = 0xFFC0C0F0;
+
+	Vector3 pointLightPos = { -1, 0.5, 1 };
+	unsigned int pointLightColor = 0xFFFFFF00;
 
 	for (size_t i = 0; i < 3000; i++)
 	{
