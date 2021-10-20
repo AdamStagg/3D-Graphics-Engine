@@ -609,3 +609,19 @@ Vertex* GenerateStonehengeVertexes() {
 	return output;
 
 }
+
+void GenerateStars(Vertex* starPos)
+{
+	for (size_t i = 0; i < 3000; i++)
+	{
+		starPos[i] = {
+			50 * (((float)(rand() % 201) / 100.0f) - 1),
+			50 * (((float)(rand() % 201) / 100.0f) - 1),
+			50 * (((float)(rand() % 201) / 100.0f) - 1),
+			0,
+			0,
+			0,
+			0xFFFFFFFF,
+			{} };
+	}
+}

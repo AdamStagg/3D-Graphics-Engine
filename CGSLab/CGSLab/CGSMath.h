@@ -399,6 +399,33 @@ Vector3 VectorCROSSVector(const Vector3 v1, const Vector3 v2) {
 	);
 }
 
+Vector2 VectorSUBTRACTVector(const Vector2 v1, const Vector2 v2) {
+	return Vector2
+	(
+		v1.x - v2.x,
+		v1.y - v2.y
+	);
+}
+
+Vector3 VectorSUBTRACTVector(const Vector3 v1, const Vector3 v2) {
+	return Vector3
+	(
+		v1.x - v2.x,
+		v1.y - v2.y,
+		v1.z - v2.z
+	);
+}
+
+Vector4 VectorSUBTRACTVector(const Vector4 v1, const Vector4 v2) {
+	return Vector4
+	(
+		v1.x - v2.x,
+		v1.y - v2.y,
+		v1.z - v2.z,
+		v1.w - v2.w
+	);
+}
+
 float VectorMagnitude(const Vector2 v) {
 	return sqrt(v.x * v.x + v.y * v.y);
 }

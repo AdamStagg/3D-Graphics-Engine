@@ -1,6 +1,9 @@
 #include "Rasterization.h"
+#include "main.h"
 
 int main() {
+	//Initialization
+	RS_Initialize(RasterWidth, RasterHeight);
 
 	//Create the camera
 	camera = MatrixMULTMatrix(
@@ -8,17 +11,15 @@ int main() {
 		BuildXRotationMatrix(DegToRad(-18))
 	);
 
+	//VERTEX DATA
 	Vertex* stoneHengeVerteces = GenerateStonehengeVertexes();
-	//Clear buffers
-	ClearColor(0);
-	ClearDepth();
+	Matrix4x4 stoneHengeMatrix = Identity4x4; //used for world matrix for rotation
 
-	//Initialization
-	RS_Initialize(RasterWidth, RasterHeight);
 
 	//STAR DATA
 	Vertex* starPos = new Vertex[3000];
 	Vertex starPosOrigin = { 1, 1, 1, 1, 0, 0, 0xFFFFFFFF, {} };
+	GenerateStars(starPos);
 
 
 	//LIGHT DATA
@@ -28,36 +29,27 @@ int main() {
 	Vector3 pointLightPos = { -1, 0.5, 1 };
 	unsigned int pointLightColor = 0xFFFFFF00;
 
+
 	//SET SHADER LIGHT VARIABLES
 	SV_DirectionalLightPos = directionalLightDir;
-	SV_AmbientLightPercent = .3f;
-	SV_LightColor = directionalLightColor;
-
-	for (size_t i = 0; i < 3000; i++)
-	{
-		starPos[i] = { 
-			50 * (((float)(rand() % 201) / 100.0f) - 1), 
-			50 * (((float)(rand() % 201) / 100.0f) - 1), 
-			50 * (((float)(rand() % 201) / 100.0f) - 1),
-			0, 
-			0, 
-			0, 
-			0xFFFFFFFF, 
-			{} };
-	}
+	SV_AmbientLightPercent = 0.3f;
+	SV_DirectionalLightColor = directionalLightColor;
+	SV_PointLightPos = pointLightPos;
+	SV_PointLightColor = pointLightColor;
 
 
-	while (RS_Update(Raster, RasterPixelCount))
+
+	do
 	{
 		//Initialization
 		timer.Signal();
-		ClearColor(0xFF000080);
+		ClearColor(0xFF000060);
 		ClearDepth();
-		VertexShader = VS_PerspectiveLighting;
+		VertexShader = VS_PerspectiveVertexLighting;
 		SV_ViewMatrix = OrthogonalAffineInverse(camera);
 		SV_ProjectionMatrix = BuildProjectionMatrix(VerticalFOV, NearPlane, FarPlane, AspectRatio);
 
-		SV_WorldMatrix = Identity4x4;
+		//SV_WorldMatrix = Identity4x4;
 
 		//Draw star field
 		for (size_t i = 0; i < 3000; i++)
@@ -66,7 +58,8 @@ int main() {
 			//Draw point
 			DrawPoint(starPos[i], starPos[i].color);
 		}
-
+		
+		SV_WorldMatrix = stoneHengeMatrix;
 		PixelShader = PS_NearestLight;
 		SV_TextureArray = StoneHenge_pixels;
 		SV_TextureArrayWidth = StoneHenge_width;
@@ -74,7 +67,7 @@ int main() {
 		//SV_WorldMatrix = BuildScaleMatrix(0.1f, 0.1f, 0.1f);
 
 		//Draw the stonehenge model
-		for (size_t i = 0; i < StoneHengeIndexCount; i+=3)
+		for (size_t i = 0; i < StoneHengeIndexCount; i += 3)
 		{
 			//Parametric(stoneHengeVerteces[StoneHenge_indicies[i]],		stoneHengeVerteces[StoneHenge_indicies[i + 1]], 0);
 			//Parametric(stoneHengeVerteces[StoneHenge_indicies[i+1]],	stoneHengeVerteces[StoneHenge_indicies[i + 2]], 0);
@@ -85,21 +78,34 @@ int main() {
 
 
 		if (GetAsyncKeyState(VK_UP)) {
-			camera = MatrixMULTMatrix(BuildXRotationMatrix(1 * static_cast<float>(timer.Delta())), camera);
+			for (size_t i = 0; i < StoneHengeVertexCount; i++)
+			{
+				stoneHengeMatrix = MatrixMULTMatrix(stoneHengeMatrix, BuildXRotationMatrix(DegToRad(1 * static_cast<float>(0.02f * timer.Delta()))));
+
+			}
 		}
 		if (GetAsyncKeyState(VK_DOWN)) {
-			camera = MatrixMULTMatrix(BuildXRotationMatrix(-1 * static_cast<float>(timer.Delta())), camera);
+			for (size_t i = 0; i < StoneHengeVertexCount; i++)
+			{
+				stoneHengeMatrix = MatrixMULTMatrix(stoneHengeMatrix, BuildXRotationMatrix(DegToRad(-1 * static_cast<float>(0.02f * timer.Delta()))));
+			}
 		}
 		if (GetAsyncKeyState(VK_RIGHT)) {
-			camera = MatrixMULTMatrix(BuildYRotationMatrix(-1 * static_cast<float>(timer.Delta())), camera);
+			for (size_t i = 0; i < StoneHengeVertexCount; i++)
+			{
+				stoneHengeMatrix = MatrixMULTMatrix(stoneHengeMatrix, BuildYRotationMatrix(DegToRad(1 * static_cast<float>(0.02f * timer.Delta()))));
+			}
 		}
 		if (GetAsyncKeyState(VK_LEFT)) {
-			camera = MatrixMULTMatrix(BuildYRotationMatrix(1 * static_cast<float>(timer.Delta())), camera);
+			for (size_t i = 0; i < StoneHengeVertexCount; i++)
+			{
+				stoneHengeMatrix = MatrixMULTMatrix(stoneHengeMatrix, BuildYRotationMatrix(DegToRad(-1 * static_cast<float>(0.02f * timer.Delta()))));
+			}
 		}
 
 
 
-	};
+	} while (RS_Update(Raster, RasterPixelCount));
 
 	//Close the program
 	RS_Shutdown();
@@ -108,3 +114,5 @@ int main() {
 	delete[] starPos;
 
 }
+
+
