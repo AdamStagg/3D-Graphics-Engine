@@ -416,73 +416,73 @@ void Parametric(const Vertex& _start, const Vertex& _end, const unsigned int _co
 	//}
 }
 
-void tempFillTriangle(const Vertex& p1, const Vertex& p2, const Vertex& p3) {
-
-	Vertex copy_p1 = p1;
-	Vertex copy_p2 = p2;
-	Vertex copy_p3 = p3;
-
-	Vertex d;
-
-	if (VertexShader) {
-		VertexShader(copy_p1);
-		VertexShader(copy_p2);
-		VertexShader(copy_p3);
-	}
-
-	int numTriangles = ClipTriangle(copy_p1, copy_p2, copy_p3, d);
-
-	if (numTriangles == -1) { //don't draw
-		return;
-	}
-
-	PerspectiveDivide(copy_p1);
-	PerspectiveDivide(copy_p2);
-	PerspectiveDivide(copy_p3);
-
-	Vertex screen_p1 = NDCtoScreen(copy_p1);
-	Vertex screen_p2 = NDCtoScreen(copy_p2);
-	Vertex screen_p3 = NDCtoScreen(copy_p3);
-
-
-	int startX = static_cast<int>(min(min(screen_p1.x, screen_p2.x), screen_p3.x));
-	int startY = static_cast<int>(min(min(screen_p1.y, screen_p2.y), screen_p3.y));
-	int endX =   static_cast<int>(max(max(screen_p1.x, screen_p2.x), screen_p3.x));
-	int endY =   static_cast<int>(max(max(screen_p1.y, screen_p2.y), screen_p3.y));
-
-	for (int x = startX; x <= endX; x++)
-	{
-		for (int y = startY; y <= endY; y++)
-		{
-			Vertex bya = FindBarycentric(screen_p1, screen_p2, screen_p3, Vector2(static_cast<float>(x), static_cast<float>(y)));
-			if (bya.x >= 0 && bya.x <= 1 &&
-				bya.y >= 0 && bya.y <= 1 &&
-				bya.z >= 0 && bya.z <= 1)
-			{
-				//float z = berpf(bya, screen_p1.z, screen_p2.z, screen_p3.z);
-
-				Vertex barycentric = berp(bya, screen_p1, screen_p2, screen_p3);
-				float z = berp(bya, screen_p1.z, screen_p2.z, screen_p3.z);
-				float u = berp(bya, screen_p1.u / screen_p1.w, screen_p2.u / screen_p2.w, screen_p3.u / screen_p3.w);
-				float v = berp(bya, screen_p1.v / screen_p1.w, screen_p2.v / screen_p2.w, screen_p3.v / screen_p3.w);
-				//float u = berp(bya, screen_p1.u, screen_p2.u, screen_p3.u);
-				//float v = berp(bya, screen_p1.v, screen_p2.v, screen_p3.v);
-				float RecipW = berp(bya, 1 / screen_p1.w, 1 / screen_p2.w, 1 / screen_p3.w);
-				//float w = berpf(bya, p1.w, p2.w, p3.w);
-				//unsigned int berpColor = colorBerp(bya, screen_p1.color, screen_p2.color, screen_p3.color);
-				PIXEL copyColor = barycentric.color;
-				if (PixelShader) {
-					Vertex pixelVert = { 0.0f, 0.0f, 0.0f, 0.0f, u / RecipW, v / RecipW, copyColor , {} };
-					PixelShader(pixelVert);
-					copyColor = pixelVert.color;
-				}
-
-				PlotPixel(Vertex(static_cast<float>(x), static_cast<float>(y), barycentric.z, 0, 0, 0, 0, {}), copyColor);
-			}
-		}
-	}
-
-}
+//void tempFillTriangle(const Vertex& p1, const Vertex& p2, const Vertex& p3) {
+//
+//	Vertex copy_p1 = p1;
+//	Vertex copy_p2 = p2;
+//	Vertex copy_p3 = p3;
+//
+//	Vertex d;
+//
+//	if (VertexShader) {
+//		VertexShader(copy_p1);
+//		VertexShader(copy_p2);
+//		VertexShader(copy_p3);
+//	}
+//
+//	int numTriangles = ClipTriangle(copy_p1, copy_p2, copy_p3, d);
+//
+//	if (numTriangles == -1) { //don't draw
+//		return;
+//	}
+//
+//	PerspectiveDivide(copy_p1);
+//	PerspectiveDivide(copy_p2);
+//	PerspectiveDivide(copy_p3);
+//
+//	Vertex screen_p1 = NDCtoScreen(copy_p1);
+//	Vertex screen_p2 = NDCtoScreen(copy_p2);
+//	Vertex screen_p3 = NDCtoScreen(copy_p3);
+//
+//
+//	int startX = static_cast<int>(min(min(screen_p1.x, screen_p2.x), screen_p3.x));
+//	int startY = static_cast<int>(min(min(screen_p1.y, screen_p2.y), screen_p3.y));
+//	int endX =   static_cast<int>(max(max(screen_p1.x, screen_p2.x), screen_p3.x));
+//	int endY =   static_cast<int>(max(max(screen_p1.y, screen_p2.y), screen_p3.y));
+//
+//	for (int x = startX; x <= endX; x++)
+//	{
+//		for (int y = startY; y <= endY; y++)
+//		{
+//			Vertex bya = FindBarycentric(screen_p1, screen_p2, screen_p3, Vector2(static_cast<float>(x), static_cast<float>(y)));
+//			if (bya.x >= 0 && bya.x <= 1 &&
+//				bya.y >= 0 && bya.y <= 1 &&
+//				bya.z >= 0 && bya.z <= 1)
+//			{
+//				//float z = berpf(bya, screen_p1.z, screen_p2.z, screen_p3.z);
+//
+//				Vertex barycentric = berp(bya, screen_p1, screen_p2, screen_p3);
+//				float z = berp(bya, screen_p1.z, screen_p2.z, screen_p3.z);
+//				float u = berp(bya, screen_p1.u / screen_p1.w, screen_p2.u / screen_p2.w, screen_p3.u / screen_p3.w);
+//				float v = berp(bya, screen_p1.v / screen_p1.w, screen_p2.v / screen_p2.w, screen_p3.v / screen_p3.w);
+//				//float u = berp(bya, screen_p1.u, screen_p2.u, screen_p3.u);
+//				//float v = berp(bya, screen_p1.v, screen_p2.v, screen_p3.v);
+//				float RecipW = berp(bya, 1 / screen_p1.w, 1 / screen_p2.w, 1 / screen_p3.w);
+//				//float w = berpf(bya, p1.w, p2.w, p3.w);
+//				//unsigned int berpColor = colorBerp(bya, screen_p1.color, screen_p2.color, screen_p3.color);
+//				PIXEL copyColor = barycentric.color;
+//				if (PixelShader) {
+//					Vertex pixelVert = { 0.0f, 0.0f, 0.0f, 0.0f, u / RecipW, v / RecipW, copyColor , {} };
+//					PixelShader(pixelVert);
+//					copyColor = pixelVert.color;
+//				}
+//
+//				PlotPixel(Vertex(static_cast<float>(x), static_cast<float>(y), barycentric.z, 0, 0, 0, 0, {}), copyColor);
+//			}
+//		}
+//	}
+//
+//}
 
 void FillTriangle(const Vertex& p1, const Vertex& p2, const Vertex& p3) {
 	Vertex screen_p1 = NDCtoScreen(p1);
@@ -615,13 +615,16 @@ void GenerateStars(Vertex* starPos)
 	for (size_t i = 0; i < 3000; i++)
 	{
 		starPos[i] = {
-			50 * (((float)(rand() % 201) / 100.0f) - 1),
-			50 * (((float)(rand() % 201) / 100.0f) - 1),
-			50 * (((float)(rand() % 201) / 100.0f) - 1),
+			(((float)(rand() % 201) / 100.0f) - 1),
+			(((float)(rand() % 201) / 100.0f) - 1),
+			(((float)(rand() % 201) / 100.0f) - 1),
 			0,
 			0,
 			0,
 			0xFFFFFFFF,
 			{} };
+		NormalizeVector(starPos[i]);
+		
+		
 	}
 }

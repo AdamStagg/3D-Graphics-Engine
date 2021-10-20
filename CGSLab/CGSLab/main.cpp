@@ -32,11 +32,10 @@ int main() {
 
 	//SET SHADER LIGHT VARIABLES
 	SV_DirectionalLightPos = directionalLightDir;
-	SV_AmbientLightPercent = 0.3f;
+	SV_AmbientLightPercent = 0.1f;
 	SV_DirectionalLightColor = directionalLightColor;
 	SV_PointLightPos = pointLightPos;
 	SV_PointLightColor = pointLightColor;
-
 
 
 	do
@@ -49,7 +48,10 @@ int main() {
 		SV_ViewMatrix = OrthogonalAffineInverse(camera);
 		SV_ProjectionMatrix = BuildProjectionMatrix(VerticalFOV, NearPlane, FarPlane, AspectRatio);
 
+		SV_PointLightRadius = 2.5f + (2.5f * sin(timer.TotalTime()));
+		SV_WorldMatrix = stoneHengeMatrix;
 		//SV_WorldMatrix = Identity4x4;
+
 
 		//Draw star field
 		for (size_t i = 0; i < 3000; i++)
@@ -59,6 +61,7 @@ int main() {
 			DrawPoint(starPos[i], starPos[i].color);
 		}
 		
+		VertexShader = VS_PerspectiveVertexLighting;
 		SV_WorldMatrix = stoneHengeMatrix;
 		PixelShader = PS_NearestLight;
 		SV_TextureArray = StoneHenge_pixels;
@@ -74,32 +77,18 @@ int main() {
 			//Parametric(stoneHengeVerteces[StoneHenge_indicies[i]],		stoneHengeVerteces[StoneHenge_indicies[i + 2]], 0);
 			DrawTriangle(stoneHengeVerteces[StoneHenge_indicies[i]], stoneHengeVerteces[StoneHenge_indicies[i + 1]], stoneHengeVerteces[StoneHenge_indicies[i + 2]]);
 		}
+	
 
-
-
-		if (GetAsyncKeyState(VK_UP)) {
-			for (size_t i = 0; i < StoneHengeVertexCount; i++)
-			{
-				stoneHengeMatrix = MatrixMULTMatrix(stoneHengeMatrix, BuildXRotationMatrix(DegToRad(1 * static_cast<float>(0.02f * timer.Delta()))));
-
-			}
-		}
-		if (GetAsyncKeyState(VK_DOWN)) {
-			for (size_t i = 0; i < StoneHengeVertexCount; i++)
-			{
-				stoneHengeMatrix = MatrixMULTMatrix(stoneHengeMatrix, BuildXRotationMatrix(DegToRad(-1 * static_cast<float>(0.02f * timer.Delta()))));
-			}
-		}
 		if (GetAsyncKeyState(VK_RIGHT)) {
 			for (size_t i = 0; i < StoneHengeVertexCount; i++)
 			{
-				stoneHengeMatrix = MatrixMULTMatrix(stoneHengeMatrix, BuildYRotationMatrix(DegToRad(1 * static_cast<float>(0.02f * timer.Delta()))));
+				camera = MatrixMULTMatrix(camera,BuildYRotationMatrix(DegToRad(1 * static_cast<float>(0.02f * timer.Delta()))));
 			}
 		}
 		if (GetAsyncKeyState(VK_LEFT)) {
 			for (size_t i = 0; i < StoneHengeVertexCount; i++)
 			{
-				stoneHengeMatrix = MatrixMULTMatrix(stoneHengeMatrix, BuildYRotationMatrix(DegToRad(-1 * static_cast<float>(0.02f * timer.Delta()))));
+				camera = MatrixMULTMatrix(camera,BuildYRotationMatrix(DegToRad(-1 * static_cast<float>(0.02f * timer.Delta()))));
 			}
 		}
 

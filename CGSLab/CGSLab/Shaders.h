@@ -15,6 +15,7 @@ float SV_AmbientLightPercent;
 unsigned int SV_DirectionalLightColor;
 Vector3 SV_PointLightPos;
 unsigned int SV_PointLightColor;
+float SV_PointLightRadius;
 
 unsigned int* SV_TextureArray;
 unsigned int SV_TextureArrayWidth = 0;
@@ -49,7 +50,10 @@ void VS_PerspectiveVertexLighting(Vertex& vert) {
 	//Point Light
 	Vector3 pointLightDir = VectorSUBTRACTVector(SV_PointLightPos, vert.values);
 	lightRatio = Saturate(VectorDOTVector(pointLightDir, vert.normal));
+	float pointLightAttenuation = 1.0f - Saturate(VectorMagnitude(pointLightDir) / SV_PointLightRadius);
+	lightRatio *= pointLightAttenuation;
 	unsigned int pointColor = colorLerp(0xFF000000, SV_PointLightColor, lightRatio);
+
 
 	vert.color = CombineColors(vert.color, pointColor);
 

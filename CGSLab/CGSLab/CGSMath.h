@@ -434,6 +434,14 @@ float VectorMagnitude(const Vector3 v) {
 	return sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
 }
 
+float VectorMagnitude(const Vector4 v) {
+	return sqrt(v.x * v.x + v.y * v.y + v.z * v.z + v.w * v.w);
+}
+
+float VectorMagnitude(const Vertex v) {
+	return sqrt(v.x * v.x + v.y * v.y + v.z * v.z + v.w * v.w);
+}
+
 void NormalizeVector(Vector2& v) {
 	float mag = VectorMagnitude(v);
 	v.x /= mag;
@@ -445,6 +453,22 @@ void NormalizeVector(Vector3& v) {
 	v.x /= mag;
 	v.y /= mag;
 	v.z /= mag;
+}
+
+void NormalizeVector(Vector4& v) {
+	float mag = VectorMagnitude(v);
+	v.x /= mag;
+	v.y /= mag;
+	v.z /= mag;
+	v.w /= mag;
+}
+
+void NormalizeVector(Vertex& v) {
+	float mag = VectorMagnitude(v);
+	v.x /= mag;
+	v.y /= mag;
+	v.z /= mag;
+	v.w /= mag;
 }
 
 void Saturate(float& value, float max) {
