@@ -77,10 +77,10 @@ int main() {
 			camera = MatrixMULTMatrix(BuildXRotationMatrix(-1 * static_cast<float>(timer.Delta())), camera);
 		}
 		if (GetAsyncKeyState(VK_RIGHT)) {
-			camera = MatrixMULTMatrix(camera, BuildYRotationMatrix(-1 * static_cast<float>(timer.Delta())));
+			camera = MatrixMULTMatrix(BuildYRotationMatrix(-1 * static_cast<float>(timer.Delta())), camera);
 		}
 		if (GetAsyncKeyState(VK_LEFT)) {
-			camera = MatrixMULTMatrix(camera, BuildYRotationMatrix(1 * static_cast<float>(timer.Delta())));
+			camera = MatrixMULTMatrix(BuildYRotationMatrix(1 * static_cast<float>(timer.Delta())), camera);
 		}
 
 
