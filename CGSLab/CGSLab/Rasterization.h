@@ -162,7 +162,7 @@ void DrawPoint(const Vertex& _pos, const PIXEL& _color) {
 
 	PIXEL copyColor = _color;
 
-	Saturate(screen.z);
+	screen.z = Saturate(screen.z);
 
 	PlotPixel(screen, copyColor);
 
@@ -196,7 +196,9 @@ void Bresenham(const Vertex& _startPos, const Vertex& _endPos, const unsigned in
 
 			PIXEL copyColor = _color;
 			if (PixelShader) {
-				PixelShader(copyColor, 0, 0, 0);
+				Vertex pixelVert = { 0, 0, 0, 0, 0, 0, copyColor , {} };
+				PixelShader(pixelVert);
+				copyColor = pixelVert.color;
 			}
 			PlotPixel(Vertex(static_cast<float>(curr_x), static_cast<float>(curr_y), curr_z, 1, 0, 0, 0, {}), copyColor);
 		}
@@ -358,7 +360,9 @@ void Parametric(const Vertex& _start, const Vertex& _end, const unsigned int _co
 
 		PIXEL copyColor = _color1;
 		if (PixelShader) {
-			PixelShader(copyColor, 0, 0, 0);
+			Vertex pixelVert = { 0, 0, 0, 0, 0, 0, copyColor, {} };
+			PixelShader(pixelVert);
+			copyColor = pixelVert.color;
 		}
 		PlotPixel(Vertex(static_cast<float>(curr_x), static_cast<float>(curr_y), curr_z, 1, 0, 0, 0, {}), copyColor);
 	}
@@ -466,11 +470,14 @@ void tempFillTriangle(const Vertex& p1, const Vertex& p2, const Vertex& p3) {
 				float RecipW = berp(bya, 1 / screen_p1.w, 1 / screen_p2.w, 1 / screen_p3.w);
 				//float w = berpf(bya, p1.w, p2.w, p3.w);
 				//unsigned int berpColor = colorBerp(bya, screen_p1.color, screen_p2.color, screen_p3.color);
+				PIXEL copyColor = barycentric.color;
 				if (PixelShader) {
-					PixelShader(barycentric.color, u / RecipW, v / RecipW, barycentric.w);
+					Vertex pixelVert = { 0.0f, 0.0f, 0.0f, 0.0f, u / RecipW, v / RecipW, copyColor , {} };
+					PixelShader(pixelVert);
+					copyColor = pixelVert.color;
 				}
 
-				PlotPixel(Vertex(static_cast<float>(x), static_cast<float>(y), barycentric.z, 0, 0, 0, 0, {}), barycentric.color);
+				PlotPixel(Vertex(static_cast<float>(x), static_cast<float>(y), barycentric.z, 0, 0, 0, 0, {}), copyColor);
 			}
 		}
 	}
@@ -507,11 +514,14 @@ void FillTriangle(const Vertex& p1, const Vertex& p2, const Vertex& p3) {
 				float RecipW = berp(bya, 1 / screen_p1.w, 1 / screen_p2.w, 1 / screen_p3.w);
 				//float w = berpf(bya, p1.w, p2.w, p3.w);
 				//unsigned int berpColor = colorBerp(bya, screen_p1.color, screen_p2.color, screen_p3.color);
+				PIXEL copyColor = barycentric.color;
 				if (PixelShader) {
-					PixelShader(barycentric.color, u / RecipW, v / RecipW, barycentric.w);
+					Vertex pixelVert = { 0, 0, 0, 0, u / RecipW, v / RecipW, copyColor, {} };
+					PixelShader(pixelVert);
+					copyColor = pixelVert.color;
 				}
 
-				PlotPixel(Vertex(static_cast<float>(x), static_cast<float>(y), barycentric.z, 0, 0, 0, 0, {}), barycentric.color);
+				PlotPixel(Vertex(static_cast<float>(x), static_cast<float>(y), barycentric.z, 0, 0, 0, 0, {}), copyColor);
 			}
 		}
 	}
@@ -589,12 +599,12 @@ Vertex* GenerateStonehengeVertexes() {
 
 	for (size_t i = 0; i < StoneHengeVertexCount; i++)
 	{
-		output[i] = Vertex(
-			StoneHenge_data[i].pos[0] * .1f, StoneHenge_data[i].pos[1] * .1f, StoneHenge_data[i].pos[2]* .1f,
+		output[i] = {
+			StoneHenge_data[i].pos[0] * .1f, StoneHenge_data[i].pos[1] * .1f, StoneHenge_data[i].pos[2] * .1f,
 			1, StoneHenge_data[i].uvw[0], StoneHenge_data[i].uvw[1],
-			0, 
+			0,
 			Vector3(StoneHenge_data[i].nrm[0], StoneHenge_data[i].nrm[1], StoneHenge_data[i].nrm[2])
-			);
+		};
 	}
 	return output;
 

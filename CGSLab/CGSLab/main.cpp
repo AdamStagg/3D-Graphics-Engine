@@ -11,8 +11,6 @@ int main() {
 	bool isBilinear = true;
 	bool backFaceCull = false;
 
-	unsigned int temp = colorLerp(0x5b7fadff, 0xff4e839c);
-
 	Vertex* stoneHengeVerteces = GenerateStonehengeVertexes();
 	//Clear buffers
 	ClearColor(0);
@@ -33,6 +31,11 @@ int main() {
 	Vector3 pointLightPos = { -1, 0.5, 1 };
 	unsigned int pointLightColor = 0xFFFFFF00;
 
+	//SET SHADER LIGHT VARIABLES
+	SV_DirectionalLightPos = directionalLightDir;
+	SV_AmbientLightPercent = 0.3f;
+	SV_LightColor = directionalLightColor;
+
 	for (size_t i = 0; i < 3000; i++)
 	{
 		starPos[i] = { 
@@ -46,13 +49,15 @@ int main() {
 			{} };
 	}
 
+	bool temp = true;
+
 	while (RS_Update(Raster, RasterPixelCount))
 	{
 		//Initialization
 		timer.Signal();
-		ClearColor(0xFF1010FF);
+		ClearColor(0xFF000080);
 		ClearDepth();
-		VertexShader = VS_PerspectiveCamera;
+		VertexShader = VS_PerspectiveLighting;
 		SV_ViewMatrix = OrthogonalAffineInverse(camera);
 		SV_ProjectionMatrix = BuildProjectionMatrix(VerticalFOV, NearPlane, FarPlane, AspectRatio);
 
@@ -66,7 +71,7 @@ int main() {
 			DrawPoint(starPos[i], starPos[i].color);
 		}
 
-		PixelShader = PS_Nearest;
+		PixelShader = temp? PS_NearestLight : PS_Nearest;
 		SV_TextureArray = StoneHenge_pixels;
 		SV_TextureArrayWidth = StoneHenge_width;
 		SV_TextureArrayHeight = StoneHenge_height;
@@ -94,6 +99,10 @@ int main() {
 		}
 		if (GetAsyncKeyState(VK_LEFT)) {
 			camera = MatrixMULTMatrix(BuildYRotationMatrix(1 * static_cast<float>(timer.Delta())), camera);
+		}
+
+		if (GetAsyncKeyState('T') & 0x1) {
+			temp = !temp;
 		}
 
 

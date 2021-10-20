@@ -3,12 +3,14 @@
 
 
 void (*VertexShader)(Vertex&) = 0;
-void (*PixelShader)(PIXEL&, float, float, float) = 0;
+void (*PixelShader)(Vertex&) = 0;
 
 Matrix4x4 SV_WorldMatrix;
 Matrix4x4 SV_ViewMatrix;
 Matrix4x4 SV_ProjectionMatrix;
 Vector3 SV_DirectionalLightPos;
+float SV_AmbientLightPercent;
+unsigned int SV_LightColor;
 unsigned int* SV_TextureArray;
 unsigned int SV_TextureArrayWidth = 0;
 unsigned int SV_TextureArrayHeight = 0;
@@ -23,34 +25,43 @@ void VS_PerspectiveCamera(Vertex& vert) {
 	finalMatrix = MatrixMULTMatrix(finalMatrix, SV_ProjectionMatrix);
 
 	vert.values = VectorMULTMatrix(vert.values, finalMatrix);
-	//vert.x = vert.x / vert.w;
-	//vert.y = vert.y / vert.w;
-	//vert.z = vert.z / vert.w;
-	//vert.w = vert.w;
 }
-//
-//void VS_PerspectiveLighting(Vertex& vert) {
-//	vert.values = VectorMULTMatrix(vert.values, SV_WorldMatrix);
-//	vert.normal = VectorMULTMatrix(Vector4(vert.normal.x, vert.normal.y, vert.normal.z, 1), SV_WorldMatrix);
-//
-//	Vector3 negLightDir = { -SV_DirectionalLightPos.x, -SV_DirectionalLightPos.y, -SV_DirectionalLightPos.z };
-//
-//	float lightRatio = Saturate(VectorDOTVector(negLightDir, vert.normal));
-//
-//	
-//
-//
-//}
+
+void VS_PerspectiveLighting(Vertex& vert) {
+	vert.values = VectorMULTMatrix(vert.values, SV_WorldMatrix);
+	vert.normal = VectorMULTMatrix(Vector4(vert.normal.x, vert.normal.y, vert.normal.z, 1), SV_WorldMatrix);
+
+	Vector3 negLightDir = { -SV_DirectionalLightPos.x, -SV_DirectionalLightPos.y, -SV_DirectionalLightPos.z };
+
+	float lightRatio = VectorDOTVector(negLightDir, vert.normal);
+	
+	lightRatio = Saturate(lightRatio + SV_AmbientLightPercent);
+	
+	vert.values = VectorMULTMatrix(vert.values, SV_ViewMatrix);
+	vert.values = VectorMULTMatrix(vert.values, SV_ProjectionMatrix);
+
+	vert.color = ScaleColor(SV_LightColor, lightRatio);
+}
 
 void PS_SetColor(PIXEL& color) {
 	color = color;
 }
 
-void PS_Nearest(PIXEL& color, float u, float v, float z = 0) {
-	color = BGRAtoARGB(SV_TextureArray[
-		(static_cast<int>(u * (SV_TextureArrayWidth))) +
-			(static_cast<int>(v * (SV_TextureArrayHeight)) * SV_TextureArrayWidth)
+void PS_Nearest(Vertex& v) {
+	
+	v.color = BGRAtoARGB(SV_TextureArray[
+		(static_cast<int>(v.u * (SV_TextureArrayWidth))) +
+			(static_cast<int>(v.v * (SV_TextureArrayHeight)) * SV_TextureArrayWidth)
 	]);
+}
+
+void PS_NearestLight(Vertex& v) {
+	unsigned int TextureColor = BGRAtoARGB(SV_TextureArray[
+		(static_cast<int>(v.u * (SV_TextureArrayWidth))) +
+			(static_cast<int>(v.v * (SV_TextureArrayHeight)) * SV_TextureArrayWidth)
+	]);
+
+	v.color = ModulateColors(TextureColor, v.color);
 }
 
 void PS_Bilinear(PIXEL& color, float u, float v, float _z) {

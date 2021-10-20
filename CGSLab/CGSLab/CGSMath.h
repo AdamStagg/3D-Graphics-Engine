@@ -420,7 +420,7 @@ void NormalizeVector(Vector3& v) {
 	v.z /= mag;
 }
 
-void Saturate(float& value, float max = 1.0f) {
+void Saturate(float& value, float max) {
 	if (value > max)
 	{
 		value = 1;
@@ -433,16 +433,16 @@ void Saturate(float& value, float max = 1.0f) {
 	}
 }
 
-void Saturate(unsigned int& value) {
-	if (value > 1) {
-		value = 1;
-		return;
-	}
-	if (value < 0) {
-		value = 0;
-		return;
-	}
-}
+//void Saturate(unsigned int& value) {
+//	if (value > 1) {
+//		value = 1;
+//		return;
+//	}
+//	if (value < 0) {
+//		value = 0;
+//		return;
+//	}
+//}
 
 unsigned int Saturate(unsigned int value, int max) {
 	if (value > max) {
@@ -451,15 +451,36 @@ unsigned int Saturate(unsigned int value, int max) {
 	if (value < 0) {
 		return 0;
 	}
+	return value;
 }
 
-float Saturate(float value, float max = 1.0f) {
+float Saturate(float value, float max) {
 	if (value > max) {
 		return max;
 	}
 	if (value < 0) {
 		return 0;
 	}
+	return value;
+}
+
+float Saturate(float value) {
+	if (value > 1) {
+		return 1;
+	}
+	if (value < 0) {
+		return 0;
+	}
+	return value;
+}
+
+unsigned int ScaleColor(unsigned int color, float ratio) {
+	unsigned int A = static_cast<unsigned int>(((color & 0xff000000) >> 24) * ratio);
+	unsigned int R = static_cast<unsigned int>(((color & 0x00ff0000) >> 16) * ratio);
+	unsigned int G = static_cast<unsigned int>(((color & 0x0000ff00) >> 8) * ratio);
+	unsigned int B = static_cast<unsigned int>((color & 0x000000ff) * ratio);
+
+	return (A << 24) | (R << 16) | (G << 8) | B;
 }
 
 unsigned int CombineColors(unsigned int color1, unsigned int color2) {
