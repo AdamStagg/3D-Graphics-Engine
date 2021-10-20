@@ -589,11 +589,11 @@ Vertex* GenerateStonehengeVertexes() {
 
 	for (size_t i = 0; i < StoneHengeVertexCount; i++)
 	{
-		StoneHenge_data[i];
 		output[i] = Vertex(
-			StoneHenge_data[i].pos[0], StoneHenge_data[i].pos[1], StoneHenge_data[i].pos[2],
-			StoneHenge_data[i].uvw[2], StoneHenge_data[i].uvw[0], StoneHenge_data[i].uvw[1],
-			0, Vector3(StoneHenge_data[i].nrm[0], StoneHenge_data[i].nrm[1], StoneHenge_data[i].nrm[2])
+			StoneHenge_data[i].pos[0] * .1f, StoneHenge_data[i].pos[1] * .1f, StoneHenge_data[i].pos[2]* .1f,
+			1, StoneHenge_data[i].uvw[0], StoneHenge_data[i].uvw[1],
+			0, 
+			Vector3(StoneHenge_data[i].nrm[0], StoneHenge_data[i].nrm[1], StoneHenge_data[i].nrm[2])
 			);
 	}
 	return output;

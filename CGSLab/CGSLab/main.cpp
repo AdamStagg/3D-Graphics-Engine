@@ -4,7 +4,7 @@ int main() {
 
 	//Create the camera
 	camera = MatrixMULTMatrix(
-		Matrix4x4({ 1, 0, 0, 0 }, { 0, 1, 0, 0 }, { 0, 0, 1, 0 }, { 0, 0, -1, 1 }),
+		Matrix4x4({ 1, 0, 0, 0 }, { 0, 1, 0, 0 }, { 0, 0, 1, 0 }, { 0, 0, -4, 1 }),
 		BuildXRotationMatrix(DegToRad(-18))
 	);
 
@@ -52,20 +52,24 @@ int main() {
 		//Draw star field
 		for (size_t i = 0; i < 3000; i++)
 		{
+			//SV_WorldMatrix = BuildScaleMatrix(0, 0, 0);
 			//Draw point
 			DrawPoint(starPos[i], starPos[i].color);
 		}
 
-		PixelShader = PS_Bilinear;
+		PixelShader = PS_Nearest;
 		SV_TextureArray = StoneHenge_pixels;
 		SV_TextureArrayWidth = StoneHenge_width;
 		SV_TextureArrayHeight = StoneHenge_height;
-		SV_WorldMatrix = BuildScaleMatrix(0.1f, 0.1f, 0.1f);
+		//SV_WorldMatrix = BuildScaleMatrix(0.1f, 0.1f, 0.1f);
 
 		//Draw the stonehenge model
-		for (size_t i = 0; i < StoneHengeVertexCount; i+=3)
+		for (size_t i = 0; i < StoneHengeIndexCount; i+=3)
 		{
-			//DrawTriangle(stoneHengeVerteces[i], stoneHengeVerteces[i + 1], stoneHengeVerteces[i + 2]);
+			//Parametric(stoneHengeVerteces[StoneHenge_indicies[i]],		stoneHengeVerteces[StoneHenge_indicies[i + 1]], 0);
+			//Parametric(stoneHengeVerteces[StoneHenge_indicies[i+1]],	stoneHengeVerteces[StoneHenge_indicies[i + 2]], 0);
+			//Parametric(stoneHengeVerteces[StoneHenge_indicies[i]],		stoneHengeVerteces[StoneHenge_indicies[i + 2]], 0);
+			DrawTriangle(stoneHengeVerteces[StoneHenge_indicies[i]], stoneHengeVerteces[StoneHenge_indicies[i + 1]], stoneHengeVerteces[StoneHenge_indicies[i + 2]]);
 		}
 
 

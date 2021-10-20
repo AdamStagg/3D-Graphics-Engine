@@ -185,6 +185,7 @@ Matrix4x4 camera;
 XTime timer;
 
 const int StoneHengeVertexCount = 1457;
+const int StoneHengeIndexCount = 2532;
 
 int triangles[]{
 	0, 4, 1, 5, 1, 4, // front face
