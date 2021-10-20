@@ -8,9 +8,6 @@ int main() {
 		BuildXRotationMatrix(DegToRad(-18))
 	);
 
-	bool isBilinear = true;
-	bool backFaceCull = false;
-
 	Vertex* stoneHengeVerteces = GenerateStonehengeVertexes();
 	//Clear buffers
 	ClearColor(0);
@@ -33,7 +30,7 @@ int main() {
 
 	//SET SHADER LIGHT VARIABLES
 	SV_DirectionalLightPos = directionalLightDir;
-	SV_AmbientLightPercent = 0.3f;
+	SV_AmbientLightPercent = .3f;
 	SV_LightColor = directionalLightColor;
 
 	for (size_t i = 0; i < 3000; i++)
@@ -49,7 +46,6 @@ int main() {
 			{} };
 	}
 
-	bool temp = true;
 
 	while (RS_Update(Raster, RasterPixelCount))
 	{
@@ -71,7 +67,7 @@ int main() {
 			DrawPoint(starPos[i], starPos[i].color);
 		}
 
-		PixelShader = temp? PS_NearestLight : PS_Nearest;
+		PixelShader = PS_NearestLight;
 		SV_TextureArray = StoneHenge_pixels;
 		SV_TextureArrayWidth = StoneHenge_width;
 		SV_TextureArrayHeight = StoneHenge_height;
@@ -101,9 +97,6 @@ int main() {
 			camera = MatrixMULTMatrix(BuildYRotationMatrix(1 * static_cast<float>(timer.Delta())), camera);
 		}
 
-		if (GetAsyncKeyState('T') & 0x1) {
-			temp = !temp;
-		}
 
 
 	};
