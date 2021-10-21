@@ -7,7 +7,8 @@ void PlotPixel(unsigned int* _raster, const int _rasterIndex, const unsigned int
 }
 
 void PlotPixel(unsigned int* _raster, const int _width, const Vector2 _pos, const unsigned int _color) {
-	_raster[ConvertDimension(_pos, _width)] = _color;
+	if (_pos.x >= 0 && _pos.x < RasterWidth && _pos.y >= 0 && _pos.y < RasterHeight)
+		_raster[ConvertDimension(_pos, _width)] = _color;
 }
 
 void ClearColor(unsigned int* _raster, const int _numPixels, unsigned int _color) {
@@ -294,6 +295,7 @@ void Parametric(unsigned int* _raster, const int _rasterWidth, const Vector2 _st
 	}
 }
 
+
 void FillTriangle(const Vertex& p1, const Vertex& p2, const Vertex& p3) {
 
 	Vertex copy_p1 = p1;
@@ -310,30 +312,67 @@ void FillTriangle(const Vertex& p1, const Vertex& p2, const Vertex& p3) {
 	Vertex screen_p2 = NDCtoScreen(copy_p2);
 	Vertex screen_p3 = NDCtoScreen(copy_p3);
 
+	Vertex tempV;
+	unsigned int tempC;
 
-	float startX =	std::min(std::min(screen_p1.x, screen_p2.x), screen_p3.x);
-	float startY =	std::min(std::min(screen_p1.y, screen_p2.y), screen_p3.y);
-	float endX =	std::max(std::max(screen_p1.x, screen_p2.x), screen_p3.x);
-	float endY =	std::max(std::max(screen_p1.y, screen_p2.y), screen_p3.y);
+	if (screen_p1.y > screen_p2.y) { //y1 holds min
+		tempV = screen_p1;
+		screen_p1 = screen_p2;
+		screen_p2 = tempV;
 
-	for (float x = startX; x < endX; x++)
+		tempC = screen_p1.color;
+		screen_p1.color = screen_p2.color;
+		screen_p2.color = tempC;
+	}
+	if (screen_p3.y < screen_p1.y) {
+		tempV = screen_p3;
+		screen_p3 = screen_p1;
+		screen_p1 = tempV;
+
+		tempC = screen_p1.color;
+		screen_p1.color = screen_p3.color;
+		screen_p3.color = tempC;
+	}
+	if (screen_p2.y > screen_p3.y) { //y3 holds max
+		tempV = screen_p3;
+		screen_p3 = screen_p2;
+		screen_p2 = tempV;
+
+
+		tempC = screen_p2.color;
+		screen_p2.color = screen_p3.color;
+		screen_p3.color = tempC;
+
+	}
+	float beta = ImplicitLineEquation(screen_p2, screen_p1, screen_p3);
+	float gamma = ImplicitLineEquation(screen_p3, screen_p2, screen_p1);
+	float alpha = ImplicitLineEquation(screen_p1, screen_p3, screen_p2);
+	int dest = beta > 0 ? 0 : RasterWidth - 1;
+
+	for (size_t currY = screen_p1.y; currY <= screen_p3.y; currY++) //loop from low to high
 	{
-		for (float y = startY; y < endY; y++)
+		float ratio = (currY - screen_p1.y) / (screen_p3.y - screen_p1.y);
+		int currX = lerp(screen_p1.x, screen_p3.x, ratio);
+	
+		for (size_t i = 0; i < std::abs(dest - currX); i++)
 		{
-			Vector4 bya = FindBarycentric(screen_p1, screen_p2, screen_p3, Vector2(x, y));
-			if (bya.x >= 0 && bya.x <= 1 &&
-				bya.y >= 0 && bya.y <= 1 &&
-				bya.z >= 0 && bya.z <= 1)
+			float ratio = static_cast<float>(i) / std::abs(dest - currX);
+
+			unsigned int curr_x = (int)lerp(currX, dest, ratio);
+
+			float a = ImplicitLineEquation({ (float)curr_x, (float)currY }, screen_p3, screen_p2) / alpha;
+			float b = ImplicitLineEquation({ (float)curr_x, (float)currY }, screen_p1, screen_p3) / beta;
+			float y = ImplicitLineEquation({ (float)curr_x, (float)currY }, screen_p2, screen_p1) / gamma;
+
+			if (
+				y >= 0 && y <= 1 &&
+				a >= 0 && a <= 1)
 			{
-				A_PIXEL berpedColor = colorBerp(bya, screen_p1.color, screen_p2.color, screen_p3.color);
-
-				if (PixelShader) {
-					PixelShader(berpedColor);
-				}
-
-				PlotPixel(Raster, RasterWidth, Vector2(x, y), berpedColor);
+				PlotPixel(Raster, RasterWidth, { (float)curr_x, (float)currY }, colorBerp({ b, y, a }, screen_p1.color, screen_p2.color, screen_p3.color));
+			}
+			else {
+				break;
 			}
 		}
 	}
-
 }
