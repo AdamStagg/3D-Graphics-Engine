@@ -18,10 +18,13 @@ void VS_PerspectiveCamera(Vertex& vert) {
 	Matrix4x4 viewMatrix = OrthogonalAffineInverse(camera);
 	Matrix4x4 projectionMatrix = BuildProjectionMatrix(VerticalFOV, NearPlane, FarPlane, AspectRatio);
 
-	Matrix4x4 finalMatrix = MatrixMULTMatrix(SV_WorldMatrix, viewMatrix);
-	finalMatrix = MatrixMULTMatrix(finalMatrix, projectionMatrix);
+	vert.values = VectorMULTMatrix(vert.values, SV_WorldMatrix);
 
-	vert.values = VectorMULTMatrix(vert.values, finalMatrix);
+	vert.normal = VectorMULTMatrix(vert.normal, SV_WorldMatrix);
+
+	vert.values = VectorMULTMatrix(vert.values, viewMatrix);
+
+	vert.values = VectorMULTMatrix(vert.values, projectionMatrix);
 	//vert.x = vert.x / vert.w;
 	//vert.y = vert.y / vert.w;
 	//vert.z = vert.z / vert.w;

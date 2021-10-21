@@ -98,6 +98,7 @@ struct Vertex {
 		};
 	};
 	float u, v;
+	Vector3 normal;
 	unsigned int color;
 	Vertex() {
 		values = Vector4();

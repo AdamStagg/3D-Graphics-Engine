@@ -48,7 +48,30 @@ int main() {
 
 		//DRAW CUBE
 		DrawCube();
+		cubePoints[triangles[0]].u = uvs[0];
+		cubePoints[triangles[0]].v = uvs[1];
+		cubePoints[triangles[0 + 1]].u = uvs[2];
+		cubePoints[triangles[0 + 1]].v = uvs[3];
+		cubePoints[triangles[0 + 2]].u = uvs[4];
+		cubePoints[triangles[0 + 2]].v = uvs[5];
+		Vector3 normal = { 0, 0, -1 };
+		cubePoints[triangles[0]].normal = normal;
+		cubePoints[triangles[0 + 1]].normal = normal;
+		cubePoints[triangles[0 + 2]].normal = normal;
 
+		DrawTriangle(cubePoints[triangles[0]], cubePoints[triangles[0 + 1]], cubePoints[triangles[0 + 2]]);
+
+		cubePoints[triangles[0]].u = uvs[6];
+		cubePoints[triangles[0]].v = uvs[7];
+		cubePoints[triangles[0 + 1]].u = uvs[8];
+		cubePoints[triangles[0 + 1]].v = uvs[9];
+		cubePoints[triangles[0 + 2]].u = uvs[10];
+		cubePoints[triangles[0 + 2]].v = uvs[11];
+		normal = { 0, 0, 0 };
+		cubePoints[triangles[0]].normal = normal;
+		cubePoints[triangles[0 + 1]].normal = normal;
+		cubePoints[triangles[0 + 2]].normal = normal;
+		DrawTriangle(cubePoints[triangles[3]], cubePoints[triangles[3 + 1]], cubePoints[triangles[3 + 2]]);
 
 
 		//Create cube view matrix for the orbiting cube
@@ -65,7 +88,7 @@ int main() {
 		SV_WorldMatrix = MatrixMULTMatrix(SV_WorldMatrix, cubeViewMatrix);
 
 		//Draw orbiting cube
-		DrawCube();
+		//DrawCube();
 
 		//FOV checks
 		if (GetAsyncKeyState(VK_SPACE)) {

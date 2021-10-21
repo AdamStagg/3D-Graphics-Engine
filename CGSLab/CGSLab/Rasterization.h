@@ -482,6 +482,22 @@ void FillTriangle(const Vertex& p1, const Vertex& p2, const Vertex& p3) {
 	}
 }
 
+bool BackFaceCull(Vertex v1, Vertex v2, Vertex v3) {
+	Vector3 vector1 = Subtract(v2, v1);
+	Vector3 Vector2 = Subtract(v3, v1);
+
+
+	Vector3 crossProduct = Cross(vector1,Vector2);
+	Vector3 cameraPos = camera.matrix[3];
+
+	float result = DOT(cameraPos, crossProduct);
+
+	if (v1.u == uvs[0] ? result < 0 : result > 0) {
+		return false;
+	}
+	return true;
+}
+
 
 void DrawTriangle(const Vertex& p1, const Vertex& p2, const Vertex& p3) {
 
@@ -498,10 +514,12 @@ void DrawTriangle(const Vertex& p1, const Vertex& p2, const Vertex& p3) {
 	}
 
 	int numTriangles = ClipTriangle(copy_p1, copy_p2, copy_p3, FourthVertex);
-
 	PerspectiveDivide(copy_p1);
 	PerspectiveDivide(copy_p2);
 	PerspectiveDivide(copy_p3);
+	if (BackFaceCull(copy_p1, copy_p2, copy_p3)) {
+		return;
+	}
 	PerspectiveDivide(FourthVertex);
 
 	if (numTriangles == -1) { //don't draw
@@ -544,6 +562,46 @@ void DrawCube() {
 			cubePoints[triangles[i + 2]].u = uvs[10];
 			cubePoints[triangles[i + 2]].v = uvs[11];
 		}
+		Vector3 normal;
+		if (i == 3) {
+			normal = { 0, 0, -1 };
+		}
+		else if (i == 0) {
+			normal = { 0, 0, 1 };
+		}
+		else if (i == 6) {
+			normal = { 1, 0, 0 };
+		}
+		else if (i == 9) {
+			normal = { 1, 0, 0 };
+		}
+		else if (i == 12) {
+			normal = { 0, 0, 1 };
+		}
+		else if (i == 15) {
+			normal = { 0, 0, 1 };
+		}
+		else if (i == 18) {
+			normal = { -1, 0, 0 };
+		}
+		else if (i == 21) {
+			normal = { -1, 0, 0 };
+		}
+		else if (i == 22) {
+			normal = { 0, 1, 0 };
+		}
+		else if (i == 25) {
+			normal = { 0, 1, 0 };
+		}
+		else if (i == 28) {
+			normal = { 0, -1, 0 };
+		}
+		else if (i == 31) {
+			normal = { 0, -1, 0 };
+		}
+		cubePoints[triangles[i]].normal = normal;
+		cubePoints[triangles[i + 1]].normal = normal;
+		cubePoints[triangles[i + 2]].normal = normal;
 		//Draw Triangle
 		DrawTriangle(cubePoints[triangles[i]], cubePoints[triangles[i + 1]], cubePoints[triangles[i + 2]]);
 	}
