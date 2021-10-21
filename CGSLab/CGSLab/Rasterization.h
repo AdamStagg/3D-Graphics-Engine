@@ -512,11 +512,23 @@ void FillTriangle(const Vertex& p1, const Vertex& p2, const Vertex& p3) {
 				//float u = berp(bya, screen_p1.u, screen_p2.u, screen_p3.u);
 				//float v = berp(bya, screen_p1.v, screen_p2.v, screen_p3.v);
 				float RecipW = berp(bya, 1 / screen_p1.w, 1 / screen_p2.w, 1 / screen_p3.w);
+
+
+				Vector3 normal = {};
+				normal.x = berp(bya, screen_p1.normal.x, screen_p2.normal.x, screen_p3.normal.x);
+				normal.y = berp(bya, screen_p1.normal.y, screen_p2.normal.y, screen_p3.normal.y);
+				normal.z = berp(bya, screen_p1.normal.z, screen_p2.normal.z, screen_p3.normal.z);
+
+				Vector3 world = {};
+				world.x = berp(bya, screen_p1.world.x, screen_p2.world.x, screen_p3.world.x);
+				world.y = berp(bya, screen_p1.world.y, screen_p2.world.y, screen_p3.world.y);
+				world.z = berp(bya, screen_p1.world.z, screen_p2.world.z, screen_p3.world.z);
+
 				//float w = berpf(bya, p1.w, p2.w, p3.w);
 				//unsigned int berpColor = colorBerp(bya, screen_p1.color, screen_p2.color, screen_p3.color);
 				PIXEL copyColor = barycentric.color;
 				if (PixelShader) {
-					Vertex pixelVert = { 0, 0, 0, 0, u / RecipW, v / RecipW, copyColor, {} };
+					Vertex pixelVert = { 0, 0, 0, 0, u / RecipW, v / RecipW, copyColor, normal, world };
 					PixelShader(pixelVert);
 					copyColor = pixelVert.color;
 				}

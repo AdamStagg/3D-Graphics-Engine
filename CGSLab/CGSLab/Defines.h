@@ -102,6 +102,7 @@ struct Vertex {
 	float u, v;
 	unsigned int color;
 	Vector3 normal;
+	Vector3 world;
 	Vertex() {
 		values = Vector4();
 		u = 0;
@@ -109,12 +110,13 @@ struct Vertex {
 		color = 0xFF000000;
 		normal = {};
 	}
-	Vertex(float _x, float _y, float _z, float _w, float _u, float _v, PIXEL _color, Vector3 _norm) {
+	Vertex(float _x, float _y, float _z, float _w, float _u, float _v, PIXEL _color, Vector3 _norm, Vector3 _world = {}) {
 		values = { _x, _y, _z, _w };
 		u = _u;
 		v = _v;
 		this->color = _color;
 		normal = _norm;
+		world = _world;
 	}
 	operator Vector4() { return Vector4(x, y, z, w); }
 	operator Vector3() { return Vector3(x, y, z); }

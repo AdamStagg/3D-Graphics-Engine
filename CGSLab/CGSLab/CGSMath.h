@@ -234,7 +234,8 @@ Vertex NDCtoScreen(const Vertex& v) {
 		v.u,
 		v.v,
 		v.color,
-		v.normal
+		v.normal,
+		v.world
 	);
 }
 

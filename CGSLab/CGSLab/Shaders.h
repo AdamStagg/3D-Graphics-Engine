@@ -74,8 +74,8 @@ void VS_PerspectiveVertexLighting(Vertex& vert) {
 	unsigned int spotColor = colorLerp(0xff000000, SV_SpotLightColor, lightRatio);
 
 
-	//vert.color = CombineColors(vert.color, pointColor);
-	vert.color = spotColor;// CombineColors(vert.color, spotColor);
+	vert.color = pointColor;// CombineColors(vert.color, pointColor);
+	//vert.color = CombineColors(vert.color, spotColor);
 
 
 	//Turn into projection space
@@ -83,6 +83,60 @@ void VS_PerspectiveVertexLighting(Vertex& vert) {
 	vert.values = VectorMULTMatrix(vert.values, SV_ProjectionMatrix);
 
 }
+
+void VS_PerspectivePhong(Vertex& vert) {
+	vert.values = VectorMULTMatrix(vert.values, SV_WorldMatrix);
+	vert.world = vert.values;
+
+	vert.normal = VectorMULTMatrix(Vector4(vert.normal.x, vert.normal.y, vert.normal.z, 1), SV_WorldMatrix);
+	vert.values = VectorMULTMatrix(vert.values, SV_ViewMatrix);
+	vert.values = VectorMULTMatrix(vert.values, SV_ProjectionMatrix);
+
+
+
+
+}
+
+void PS_NearestPhong(Vertex& v) {
+	unsigned int TextureColor = BGRAtoARGB(SV_TextureArray[
+		(static_cast<int>(v.u * (SV_TextureArrayWidth))) +
+			(static_cast<int>(v.v * (SV_TextureArrayHeight)) * SV_TextureArrayWidth)
+	]);
+
+	//Directional Light
+	Vector3 negLightDir = { -SV_DirectionalLightPos.x, -SV_DirectionalLightPos.y, -SV_DirectionalLightPos.z };
+	float lightRatio = Saturate(VectorDOTVector(negLightDir, v.normal));
+	lightRatio = Saturate(lightRatio + SV_AmbientLightPercent);
+	v.color = colorLerp(0xFF000000, SV_DirectionalLightColor, lightRatio);
+
+	//Point Light
+	Vector3 pointLightDir = VectorSUBTRACTVector(SV_PointLightPos, v.world);
+	lightRatio = Saturate(VectorDOTVector(pointLightDir, v.normal));
+	float pointLightAttenuation = 1.0f - Saturate(VectorMagnitude(pointLightDir) / SV_PointLightRadius);
+	lightRatio *= pointLightAttenuation;
+	unsigned int pointColor = colorLerp(0xFF000000, SV_PointLightColor, lightRatio);
+
+	//Spot Light
+	Vector3 spotLightDir = VectorSUBTRACTVector(SV_SpotLightPos, v.world);
+	NormalizeVector(spotLightDir);
+	Vector3 negSpotLightDir = { -spotLightDir.x, -spotLightDir.y, -spotLightDir.z };
+
+	float surfaceRatio = Saturate(VectorDOTVector(negSpotLightDir, SV_SpotLightDir));
+	float spotFactor = (surfaceRatio > SV_ConeRatio ? 1 : 0);
+	lightRatio = Saturate(VectorDOTVector(spotLightDir, v.normal));
+	lightRatio *= spotFactor;
+	float spotLightAttenuation = 1.0f - Saturate((SV_InnerConeRatio - surfaceRatio) / (SV_InnerConeRatio - SV_OuterConeRatio));
+	lightRatio *= spotLightAttenuation;
+	unsigned int spotColor = colorLerp(0xff000000, SV_SpotLightColor, lightRatio);
+
+
+	v.color = CombineColors(v.color, pointColor);
+	v.color = CombineColors(v.color, spotColor);
+
+	v.color = ModulateColors(v.color, TextureColor);
+}
+
+
 
 void PS_SetColor(PIXEL& color) {
 	color = color;

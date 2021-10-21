@@ -44,7 +44,7 @@ int main() {
 		timer.Signal();
 		ClearColor(0xFF000060);
 		ClearDepth();
-		VertexShader = VS_PerspectiveVertexLighting;
+		VertexShader = VS_PerspectivePhong;
 		SV_ViewMatrix = OrthogonalAffineInverse(camera);
 		SV_ProjectionMatrix = BuildProjectionMatrix(VerticalFOV, NearPlane, FarPlane, AspectRatio);
 
@@ -58,12 +58,11 @@ int main() {
 		{
 			//SV_WorldMatrix = BuildScaleMatrix(0, 0, 0);
 			//Draw point
-			//DrawPoint(starPos[i], starPos[i].color);
+			DrawPoint(starPos[i], starPos[i].color);
 		}
 		
-		VertexShader = VS_PerspectiveVertexLighting;
 		SV_WorldMatrix = stoneHengeMatrix;
-		PixelShader = PS_NearestLight;
+		PixelShader = PS_NearestPhong;
 		SV_TextureArray = StoneHenge_pixels;
 		SV_TextureArrayWidth = StoneHenge_width;
 		SV_TextureArrayHeight = StoneHenge_height;
