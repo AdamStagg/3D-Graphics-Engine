@@ -21,21 +21,22 @@ int main() {
 	GenerateStars(starPos);
 
 
-	//LIGHT DATA
-	Vector3 directionalLightDir = { -0.577f, -0.577f, 0.577f };
-	unsigned int directionalLightColor = 0xFFC0C0F0;
-
-	Vector3 pointLightPos = { -1, 0.5, 1 };
-	unsigned int pointLightColor = 0xFFFFFF00;
-
-
 	//SET SHADER LIGHT VARIABLES
-	SV_DirectionalLightPos = directionalLightDir;
-	SV_AmbientLightPercent = 0.1f;
-	SV_DirectionalLightColor = directionalLightColor;
-	SV_PointLightPos = pointLightPos;
-	SV_PointLightColor = pointLightColor;
+	SV_DirectionalLightPos = { -0.577f, -0.577f, 0.577f };
+	SV_DirectionalLightColor = 0xFFC0C0F0;
 
+	SV_AmbientLightPercent = 0.1f;
+	
+	SV_PointLightPos = { -1, 0.5, 1 };
+	SV_PointLightColor = 0xFFFFFF00;
+
+	SV_SpotLightPos = { 2, 1, -2 };
+	SV_SpotLightColor = 0xFFFF0000;
+	SV_SpotLightDir = Normalize({ -1, -1, 1 });
+	SV_ConeRatio = cos(DegToRad(30.0f));
+	SV_InnerConeRatio = .5f;
+	SV_OuterConeRatio = 3;
+	
 
 	do
 	{
@@ -57,7 +58,7 @@ int main() {
 		{
 			//SV_WorldMatrix = BuildScaleMatrix(0, 0, 0);
 			//Draw point
-			DrawPoint(starPos[i], starPos[i].color);
+			//DrawPoint(starPos[i], starPos[i].color);
 		}
 		
 		VertexShader = VS_PerspectiveVertexLighting;

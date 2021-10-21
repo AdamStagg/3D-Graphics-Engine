@@ -16,6 +16,12 @@ unsigned int SV_DirectionalLightColor;
 Vector3 SV_PointLightPos;
 unsigned int SV_PointLightColor;
 float SV_PointLightRadius;
+Vector3 SV_SpotLightPos;
+Vector3 SV_SpotLightDir;
+unsigned int SV_SpotLightColor;
+float SV_ConeRatio;
+float SV_InnerConeRatio;
+float SV_OuterConeRatio;
 
 unsigned int* SV_TextureArray;
 unsigned int SV_TextureArrayWidth = 0;
@@ -54,9 +60,22 @@ void VS_PerspectiveVertexLighting(Vertex& vert) {
 	lightRatio *= pointLightAttenuation;
 	unsigned int pointColor = colorLerp(0xFF000000, SV_PointLightColor, lightRatio);
 
+	//Spot Light
+	Vector3 spotLightDir = VectorSUBTRACTVector(SV_SpotLightPos, vert.values);
+	NormalizeVector(spotLightDir);
+	Vector3 negSpotLightDir = {-spotLightDir.x, -spotLightDir.y, -spotLightDir.z};
 
-	vert.color = CombineColors(vert.color, pointColor);
+	float surfaceRatio = Saturate(VectorDOTVector(negSpotLightDir, SV_SpotLightDir));
+	float spotFactor = (surfaceRatio > SV_ConeRatio ? 1 : 0);
+	lightRatio = Saturate(VectorDOTVector(spotLightDir, vert.normal));
+	lightRatio *= spotFactor;
+	float spotLightAttenuation = 1.0f - Saturate((SV_InnerConeRatio - surfaceRatio) / (SV_InnerConeRatio - SV_OuterConeRatio));
+	lightRatio *= spotLightAttenuation;
+	unsigned int spotColor = colorLerp(0xff000000, SV_SpotLightColor, lightRatio);
 
+
+	//vert.color = CombineColors(vert.color, pointColor);
+	vert.color = spotColor;// CombineColors(vert.color, spotColor);
 
 
 	//Turn into projection space

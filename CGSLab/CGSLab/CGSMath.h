@@ -455,6 +455,15 @@ void NormalizeVector(Vector3& v) {
 	v.z /= mag;
 }
 
+Vector3 Normalize(const Vector3& v) {
+	float mag = VectorMagnitude(v);
+	return Vector3(
+		v.x / mag,
+		v.y / mag,
+		v.z / mag
+	);
+}
+
 void NormalizeVector(Vector4& v) {
 	float mag = VectorMagnitude(v);
 	v.x /= mag;
